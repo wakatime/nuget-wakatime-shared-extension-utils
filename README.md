@@ -6,12 +6,14 @@ C# nuget library to extend your extension using WakaTime core.
 Installation
 ------------
 
-1. Install via nuget
+1. Open `Manage NuGet Packages...`
+
+2. Find for `WakaTime.Shared.ExtensionUtils`
 
 .Net Framework
 --------------------------------
 
-* v4.8
+* Minimum v4.8
 
 Contributing
 ------------

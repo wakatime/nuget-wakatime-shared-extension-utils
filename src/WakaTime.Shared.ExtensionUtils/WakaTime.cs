@@ -12,9 +12,14 @@ namespace WakaTime.Shared.ExtensionUtils
 {
     public class WakaTime : IDisposable
     {
+        private const int HeartbeatFrequency = 2; // minutes
+
         private readonly Configuration _configuration;
         private readonly PythonCliParameters _pythonCliParameters = new PythonCliParameters();
         private readonly Timer _timer = new Timer();
+
+        private string _lastFile;
+        private DateTime _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
 
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue = new ConcurrentQueue<Heartbeat>();
 
@@ -61,6 +66,34 @@ namespace WakaTime.Shared.ExtensionUtils
             _timer.Start();
 
             Logger.Info($"Finished initializing WakaTime v{Constants.PluginVersion}");
+        }
+
+        public void HandleActivity(string currentFile, bool isWrite, string project)
+        {
+            if (currentFile == null)
+                return;
+
+            var now = DateTime.UtcNow;
+
+            if (!isWrite && _lastFile != null && !EnoughTimePassed(now) && currentFile.Equals(_lastFile))
+                return;
+
+            _lastFile = currentFile;
+            _lastHeartbeat = now;
+
+            AppendHeartbeat(currentFile, isWrite, now, project);
+        }
+
+        private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project)
+        {
+            var h = new Heartbeat
+            {
+                Entity = fileName,
+                Timestamp = ToUnixEpoch(time),
+                IsWrite = isWrite,
+                Project = project
+            };
+            HeartbeatQueue.Enqueue(h);
         }
 
         private void ProcessHeartbeats(object sender, ElapsedEventArgs e)
@@ -126,10 +159,18 @@ namespace WakaTime.Shared.ExtensionUtils
                 Logger.Error("Could not send heartbeat because python is not installed");
         }
 
-        public static class CoreAssembly
+        private bool EnoughTimePassed(DateTime now)
         {
-            private static readonly Assembly Reference = typeof(CoreAssembly).Assembly;
-            public static readonly Version Version = Reference.GetName().Version;
+            return _lastHeartbeat < now.AddMinutes(-1 * HeartbeatFrequency);
+        }
+
+        private static string ToUnixEpoch(DateTime date)
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var timestamp = date - epoch;
+            var seconds = Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
+            var milliseconds = timestamp.ToString("ffffff");
+            return $"{seconds}.{milliseconds}";
         }
 
         public void Dispose()
@@ -143,6 +184,12 @@ namespace WakaTime.Shared.ExtensionUtils
 
             // make sure the queue is empty	
             ProcessHeartbeats();
+        }
+
+        public static class CoreAssembly
+        {
+            private static readonly Assembly Reference = typeof(CoreAssembly).Assembly;
+            public static readonly Version Version = Reference.GetName().Version;
         }
     }
 }

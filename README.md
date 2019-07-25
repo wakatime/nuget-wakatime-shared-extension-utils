@@ -1,6 +1,8 @@
 WakaTime Shared Extension Utils
 =====================
 
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/WakaTime.Shared.ExtensionUtils?label=release)
+
 C# nuget library to extend your extension using WakaTime core.
 
 Installation

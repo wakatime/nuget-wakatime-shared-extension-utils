@@ -40,7 +40,40 @@ namespace WakaTime.Shared.ExtensionUtils
 
         internal static string CliLocation => Path.Combine(AppDataDirectory, Constants.CliFolder);
 
-        public static void DownloadAndInstallCli()
+        private static readonly Func<string> LatestWakaTimeCliVersion = () =>
+        {
+            var regex = new Regex(@"(__version_info__ = )(\(( ?\'[0-9]+\'\,?){3}\))");
+
+            if (!ServicePointManager.SecurityProtocol.HasFlag(SecurityProtocolType.Tls12))
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            }
+            var client = new WebClient { Proxy = new Proxy().Get() };
+
+            try
+            {
+                var about = client.DownloadString("https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py");
+                var match = regex.Match(about);
+
+                if (match.Success)
+                {
+                    var grp1 = match.Groups[2];
+                    var regexVersion = new Regex("([0-9]+)");
+                    var match2 = regexVersion.Matches(grp1.Value);
+                    return $"{match2[0].Value}.{match2[1].Value}.{match2[2].Value}";
+                }
+
+                Logger.Warning("Couldn't auto resolve wakatime cli version");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Exception when checking current wakatime cli version: ", ex);
+            }
+
+            return string.Empty;
+        };
+
+        internal static void DownloadAndInstallCli()
         {
             Logger.Debug("Downloading wakatime-cli...");
             const string url = Constants.CliUrl;
@@ -67,7 +100,7 @@ namespace WakaTime.Shared.ExtensionUtils
             { /* ignored */ }
         }
 
-        public static void DownloadAndInstallPython()
+        internal static void DownloadAndInstallPython()
         {
             Logger.Debug("Downloading python...");
             var url = PythonDownloadUrl;
@@ -111,7 +144,7 @@ namespace WakaTime.Shared.ExtensionUtils
             return PythonBinaryLocation ?? (PythonBinaryLocation = GetPythonPathFromFixedPath());
         }
 
-        internal static string GetPythonPathFromMicrosoftRegistry()
+        private static string GetPythonPathFromMicrosoftRegistry()
         {
             try
             {
@@ -212,7 +245,7 @@ namespace WakaTime.Shared.ExtensionUtils
                 Logger.Info($"Current wakatime-cli version is {currentVersion}");
 
                 Logger.Info("Checking for updates to wakatime-cli...");
-                var latestVersion = Constants.LatestWakaTimeCliVersion();
+                var latestVersion = LatestWakaTimeCliVersion();
 
                 if (currentVersion.Equals(latestVersion))
                 {

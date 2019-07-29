@@ -122,7 +122,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
                 _pythonCliParameters.Key = Config.ApiKey;
                 _pythonCliParameters.Plugin =
-                    $"{_configuration.EditorName}/{_configuration.EditorVersion} {Constants.PluginName}/{Constants.PluginVersion}";
+                    $"{_configuration.EditorName}/{_configuration.EditorVersion} {_configuration.PluginName}/{Constants.PluginVersion}";
                 _pythonCliParameters.File = heartbeat.Entity;
                 _pythonCliParameters.Time = heartbeat.Timestamp;
                 _pythonCliParameters.IsWrite = heartbeat.IsWrite;

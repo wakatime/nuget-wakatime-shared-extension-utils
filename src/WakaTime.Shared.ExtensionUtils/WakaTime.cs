@@ -44,7 +44,8 @@ namespace WakaTime.Shared.ExtensionUtils
             if (Logger == null)
                 Logger = new Logger();
 
-            IsAsyncLoadSupported = ServiceProviderHelper.IsAsyncPackageSupported(serviceProvider);
+            if (serviceProvider != null)
+                IsAsyncLoadSupported = ServiceProviderHelper.IsAsyncPackageSupported(serviceProvider);
         }
 
         public void InitializeAsync()

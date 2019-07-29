@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
     public class Proxy
     {
         private readonly ConfigFile _config;
+        private readonly ILogger _logger;
 
         public Proxy()
         {
             _config = new ConfigFile();
             _config.Read();
+            _logger = new Logger();
         }
 
         public WebProxy Get()
@@ -22,7 +25,7 @@ namespace WakaTime.Shared.ExtensionUtils
             {
                 if (string.IsNullOrEmpty(_config.Proxy))
                 {
-                    Logger.Debug("No proxy will be used. It's either not set or badly formatted.");
+                    _logger.Debug("No proxy will be used. It's either not set or badly formatted.");
                     return null;
                 }
 
@@ -42,7 +45,7 @@ namespace WakaTime.Shared.ExtensionUtils
                     var credentials = new NetworkCredential(username, password);
                     proxy = new WebProxy(string.Join(":", address, port), true, null, credentials);
 
-                    Logger.Debug("A proxy with authentication will be used.");
+                    _logger.Debug("A proxy with authentication will be used.");
                     return proxy;
                 }
 
@@ -57,15 +60,15 @@ namespace WakaTime.Shared.ExtensionUtils
 
                     proxy = new WebProxy(address, port);
 
-                    Logger.Debug("A proxy will be used.");
+                    _logger.Debug("A proxy will be used.");
                     return proxy;
                 }
 
-                Logger.Debug("No proxy will be used. It's either not set or badly formatted.");
+                _logger.Debug("No proxy will be used. It's either not set or badly formatted.");
             }
             catch (Exception ex)
             {
-                Logger.Error(
+                _logger.Error(
                     "Exception while parsing the proxy string from WakaTime config file. No proxy will be used.",
                     ex);
             }

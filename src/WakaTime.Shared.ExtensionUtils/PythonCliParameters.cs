@@ -5,7 +5,14 @@ namespace WakaTime.Shared.ExtensionUtils
 {
     public class PythonCliParameters
     {
-        private static string Cli => Dependencies.CliLocation;
+        private readonly Dependencies _dependencies;
+
+        public PythonCliParameters()
+        {
+            _dependencies = new Dependencies();
+        }
+
+        private string Cli => _dependencies.CliLocation;
         public string Key { get; set; }
         public string File { get; set; }
         public string Time { get; set; }

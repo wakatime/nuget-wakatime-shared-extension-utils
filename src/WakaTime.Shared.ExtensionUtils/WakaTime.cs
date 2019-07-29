@@ -17,20 +17,32 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly Configuration _configuration;
         private readonly PythonCliParameters _pythonCliParameters = new PythonCliParameters();
         private readonly Timer _timer = new Timer();
-
+        private readonly Dependencies _dependencies;
         private string _lastFile;
         private DateTime _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
 
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue = new ConcurrentQueue<Heartbeat>();
 
+        public ILogger Logger { get; }
         public ConfigFile Config { get; }
         public bool IsAsyncLoadSupported { get; }
+
+        public WakaTime(IServiceProvider serviceProvider, Configuration configuration, ILogger logger) 
+            : this(serviceProvider, configuration)
+        {
+            Logger = logger;
+        }
 
         public WakaTime(IServiceProvider serviceProvider, Configuration configuration)
         {
             _configuration = configuration;
             Config = new ConfigFile();
             Config.Read();
+
+            _dependencies = new Dependencies();
+
+            if (Logger == null)
+                Logger = new Logger();
 
             IsAsyncLoadSupported = ServiceProviderHelper.IsAsyncPackageSupported(serviceProvider);
         }
@@ -42,14 +54,14 @@ namespace WakaTime.Shared.ExtensionUtils
             try
             {
                 // Make sure python is installed
-                if (!Dependencies.IsPythonInstalled())
+                if (!_dependencies.IsPythonInstalled())
                 {
-                    Dependencies.DownloadAndInstallPython();
+                    _dependencies.DownloadAndInstallPython();
                 }
 
-                if (!Dependencies.DoesCliExist() || !Dependencies.IsCliUpToDate())
+                if (!_dependencies.DoesCliExist() || !_dependencies.IsCliUpToDate())
                 {
-                    Dependencies.DownloadAndInstallCli();
+                    _dependencies.DownloadAndInstallCli();
                 }
             }
             catch (WebException ex)
@@ -106,7 +118,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
         private void ProcessHeartbeats()
         {
-            var pythonBinary = Dependencies.GetPython();
+            var pythonBinary = _dependencies.GetPython();
             if (pythonBinary != null)
             {
                 // get first heartbeat from queue

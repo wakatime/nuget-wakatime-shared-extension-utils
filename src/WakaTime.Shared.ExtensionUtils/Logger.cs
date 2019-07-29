@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
-    internal enum LogLevel
+    public enum LogLevel
     {
         Debug = 1,
         Info,
@@ -13,17 +13,17 @@ namespace WakaTime.Shared.ExtensionUtils
         HandledException
     }
 
-    public static class Logger
+    public class Logger : ILogger
     {
-        private static readonly ConfigFile Config;
-        private static IVsOutputWindowPane _wakatimeOutputWindowPane;
-        private static IVsOutputWindowPane WakatimeOutputWindowPane =>
+        private readonly ConfigFile _config;
+        private IVsOutputWindowPane _wakatimeOutputWindowPane;
+        private IVsOutputWindowPane WakatimeOutputWindowPane =>
             _wakatimeOutputWindowPane ?? (_wakatimeOutputWindowPane = GetWakatimeOutputWindowPane());
 
-        static Logger()
+        public Logger()
         {
-            Config = new ConfigFile();
-            Config.Read();
+            _config = new ConfigFile();
+            _config.Read();
         }
 
         private static IVsOutputWindowPane GetWakatimeOutputWindowPane()
@@ -38,32 +38,32 @@ namespace WakaTime.Shared.ExtensionUtils
             return windowPane;
         }
 
-        public static void Debug(string message)
+        public void Debug(string message)
         {
-            if (!Config.Debug)
+            if (!_config.Debug)
                 return;
 
             Log(LogLevel.Debug, message);
         }
 
-        public static void Error(string message, Exception ex = null)
+        public void Error(string message, Exception ex = null)
         {
             var exceptionMessage = $"{message}: {ex}";
 
             Log(LogLevel.HandledException, exceptionMessage);
         }
 
-        public static void Warning(string message)
+        public void Warning(string message)
         {
             Log(LogLevel.Warning, message);
         }
 
-        public static void Info(string message)
+        public void Info(string message)
         {
             Log(LogLevel.Info, message);
         }
 
-        private static void Log(LogLevel level, string message)
+        private void Log(LogLevel level, string message)
         {
             var outputWindowPane = WakatimeOutputWindowPane;
             if (outputWindowPane == null) return;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Text.RegularExpressions;
-
-namespace WakaTime.Shared.ExtensionUtils
+﻿namespace WakaTime.Shared.ExtensionUtils
 {
     internal static class Constants
     {

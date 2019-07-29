@@ -31,7 +31,7 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
-        private static string AppDataDirectory
+        public string AppDataDirectory
         {
             get
             {

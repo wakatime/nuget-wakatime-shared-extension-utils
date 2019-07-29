@@ -10,7 +10,7 @@
     <iconUrl>https://wakatime.com/static/img/wakatime-240.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Quantify your coding with automatic time tracking and metrics about your programming.</description>
-    <releaseNotes>$version$</releaseNotes>
+    <releaseNotes>v$version$</releaseNotes>
     <copyright>Copyright 2019</copyright>
     <tags>wakatime plugin extension</tags>
   </metadata>

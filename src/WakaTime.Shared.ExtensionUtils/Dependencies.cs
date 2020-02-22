@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -10,12 +11,14 @@ namespace WakaTime.Shared.ExtensionUtils
 {
     public class Dependencies
     {
+        private readonly bool _standalone;
         private const string CurrentPythonVersion = "3.6.0";
 
         private readonly ILogger _logger;
 
-        public Dependencies()
+        public Dependencies(bool standalone)
         {
+            _standalone = standalone;
             _logger = new Logger();
         }
 
@@ -47,20 +50,19 @@ namespace WakaTime.Shared.ExtensionUtils
         }
 
         internal string CliLocation => Path.Combine(AppDataDirectory, Constants.CliFolder);
+        internal string StandaloneCliLocation => Path.Combine(AppDataDirectory, Constants.StandaloneCli);
 
         private string LatestWakaTimeCliVersion()
         {
-            var regex = new Regex(@"(__version_info__ = )(\(( ?\'[0-9]+\'\,?){3}\))");
-
-            if (!ServicePointManager.SecurityProtocol.HasFlag(SecurityProtocolType.Tls12))
-            {
-                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            }
-            var client = new WebClient { Proxy = new Proxy().Get() };
-
             try
             {
-                var about = client.DownloadString("https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py");
+                if (_standalone)
+                    return DownloadString(Path.Combine(GetS3BucketUrl(), "current_version.txt"));
+
+                var regex = new Regex(@"(__version_info__ = )(\(( ?\'[0-9]+\'\,?){3}\))");
+
+                var about = DownloadString(
+                    "https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py");
                 var match = regex.Match(about);
 
                 if (match.Success)
@@ -83,29 +85,43 @@ namespace WakaTime.Shared.ExtensionUtils
 
         internal void DownloadAndInstallCli()
         {
-            _logger.Debug("Downloading wakatime-cli...");
-            const string url = Constants.CliUrl;
-            var destinationDir = AppDataDirectory;
-            var localZipFile = Path.Combine(destinationDir, "wakatime-cli.zip");
-
-            // Download wakatime-cli
-            DownloadFile(url, localZipFile);
-            _logger.Debug("Finished downloading wakatime-cli.");
-
-            // Remove old folder if it exists
-            RecursiveDelete(Path.Combine(destinationDir, "wakatime-master"));
-
-            // Extract wakatime-cli zip file
-            _logger.Debug($"Extracting wakatime-cli to: {destinationDir}");
-            ZipFile.ExtractToDirectory(localZipFile, destinationDir);
-            _logger.Debug("Finished extracting wakatime-cli.");
-
-            try
+            if (_standalone)
             {
-                File.Delete(localZipFile);
+                _logger.Debug("Downloading wakatime-cli standalone...");
+                var url = Path.Combine(GetS3BucketUrl(), "wakatime");
+
+                var destinationDir = Path.Combine(AppDataDirectory, "wakatime");
+
+                // Download standalone wakatime-cli
+                DownloadFile(url, destinationDir);
+                _logger.Debug("Finished downloading standalone wakatime-cli.");
             }
-            catch
-            { /* ignored */ }
+            else
+            {
+                _logger.Debug("Downloading wakatime-cli...");
+                const string url = Constants.CliUrl;
+                var destinationDir = AppDataDirectory;
+                var localZipFile = Path.Combine(destinationDir, "wakatime-cli.zip");
+
+                // Download wakatime-cli
+                DownloadFile(url, localZipFile);
+                _logger.Debug("Finished downloading wakatime-cli.");
+
+                // Remove old folder if it exists
+                RecursiveDelete(Path.Combine(destinationDir, "wakatime-master"));
+
+                // Extract wakatime-cli zip file
+                _logger.Debug($"Extracting wakatime-cli to: {destinationDir}");
+                ZipFile.ExtractToDirectory(localZipFile, destinationDir);
+                _logger.Debug("Finished extracting wakatime-cli.");
+
+                try
+                {
+                    File.Delete(localZipFile);
+                }
+                catch
+                { /* ignored */ }
+            }
         }
 
         internal void DownloadAndInstallPython()
@@ -186,7 +202,7 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
-        internal string GetPythonPathFromFixedPath()
+        private string GetPythonPathFromFixedPath()
         {
             var locations = new List<string>();
             for (var i = 27; i <= 50; i++)
@@ -215,7 +231,7 @@ namespace WakaTime.Shared.ExtensionUtils
             return null;
         }
 
-        internal string GetEmbeddedPythonPath()
+        private string GetEmbeddedPythonPath()
         {
             var path = Path.Combine(AppDataDirectory, "python", "pythonw");
             try
@@ -237,22 +253,36 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
+        private static string GetS3BucketUrl()
+        {
+            return Path.Combine(Constants.S3UrlPrefix,
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? $"windows-x86-{(ProcessorArchitectureHelper.Is64BitOperatingSystem ? "64" : "32")}"
+                    : "mac-x86-64");
+        }
+
         internal bool DoesCliExist()
         {
-            return File.Exists(CliLocation);
+            return _standalone ? Directory.Exists(StandaloneCliLocation) : File.Exists(CliLocation);
         }
 
         internal bool IsCliUpToDate()
         {
-            var process = new RunProcess(GetPython(), CliLocation, "--version");
-            process.Run();
+            var process = _standalone
+                ? new RunProcess(StandaloneCliLocation, "--version")
+                : new RunProcess(GetPython(), CliLocation, "--version");
 
-            if (!process.Success) return false;
+            process.Run();
+            if (!process.Success)
+            {
+                _logger.Error(process.Error);
+                return false;
+            }
 
             var currentVersion = process.Error.Trim();
             _logger.Info($"Current wakatime-cli version is {currentVersion}");
-
             _logger.Info("Checking for updates to wakatime-cli...");
+
             var latestVersion = LatestWakaTimeCliVersion();
 
             if (currentVersion.Equals(latestVersion))
@@ -266,16 +296,25 @@ namespace WakaTime.Shared.ExtensionUtils
             return false;
         }
 
-        internal void DownloadFile(string url, string saveAs)
+        private static WebClient GetWebClient()
         {
             if (!ServicePointManager.SecurityProtocol.HasFlag(SecurityProtocolType.Tls12))
-            {
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            }
 
             var proxy = new Proxy().Get();
-            var client = new WebClient {Proxy = proxy};
+            return new WebClient { Proxy = proxy };
+        }
+
+        internal void DownloadFile(string url, string saveAs)
+        {
+            var client = GetWebClient();
             client.DownloadFile(url, saveAs);
+        }
+
+        internal string DownloadString(string url)
+        {
+            var client = GetWebClient();
+            return client.DownloadString(url).Trim();
         }
 
         internal void RecursiveDelete(string folder)

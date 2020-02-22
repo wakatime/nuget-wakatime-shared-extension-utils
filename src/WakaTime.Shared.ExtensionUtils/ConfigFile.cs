@@ -9,6 +9,7 @@ namespace WakaTime.Shared.ExtensionUtils
         public string ApiKey { get; set; }
         public string Proxy { get; set; }
         public bool Debug { get; set; }
+        public bool Standalone { get; set; }
 
         private readonly string _configFilepath;
 
@@ -36,8 +37,16 @@ namespace WakaTime.Shared.ExtensionUtils
                 if (bool.TryParse(ret.ToString(), out var debug))
                     Debug = debug;
             }
+
+            // ReSharper disable once InvertIf
+            if (NativeMethods.GetPrivateProfileString("settings", "standalone", "", ret, 2083, _configFilepath) > 0)
+            {
+                if (bool.TryParse(ret.ToString(), out var standalone))
+                    Standalone = standalone;
+            }
         }
 
+        // ReSharper disable once UnusedMember.Global
         public void Save()
         {
             if (!string.IsNullOrEmpty(ApiKey))
@@ -45,6 +54,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
             NativeMethods.WritePrivateProfileString("settings", "proxy", Proxy.Trim(), _configFilepath);
             NativeMethods.WritePrivateProfileString("settings", "debug", Debug.ToString().ToLower(), _configFilepath);
+            NativeMethods.WritePrivateProfileString("settings", "standalone", Standalone.ToString().ToLower(), _configFilepath);
         }
 
         private static string GetConfigFilePath()

@@ -15,7 +15,7 @@ namespace WakaTime.Shared.ExtensionUtils
         private const int HeartbeatFrequency = 2; // minutes
 
         private readonly Configuration _configuration;
-        private readonly PythonCliParameters _pythonCliParameters = new PythonCliParameters();
+        private readonly PythonCliParameters _pythonCliParameters;
         private readonly Timer _timer = new Timer();
         private readonly Dependencies _dependencies;
         private string _lastFile;
@@ -27,7 +27,7 @@ namespace WakaTime.Shared.ExtensionUtils
         public ConfigFile Config { get; }
         public bool IsAsyncLoadSupported { get; }
 
-        public WakaTime(IServiceProvider serviceProvider, Configuration configuration, ILogger logger) 
+        public WakaTime(IServiceProvider serviceProvider, Configuration configuration, ILogger logger)
             : this(serviceProvider, configuration)
         {
             Logger = logger;
@@ -39,7 +39,8 @@ namespace WakaTime.Shared.ExtensionUtils
             Config = new ConfigFile();
             Config.Read();
 
-            _dependencies = new Dependencies();
+            _pythonCliParameters = new PythonCliParameters(Config.Standalone);
+            _dependencies = new Dependencies(Config.Standalone);
 
             if (Logger == null)
                 Logger = new Logger();
@@ -51,19 +52,16 @@ namespace WakaTime.Shared.ExtensionUtils
         public void InitializeAsync()
         {
             Logger.Info($"Initializing WakaTime v{Constants.PluginVersion}");
+            if (Config.Standalone) Logger.Debug("Using standalone wakatime-cli.");
 
             try
             {
-                // Make sure python is installed
-                if (!_dependencies.IsPythonInstalled())
-                {
+                // Make sure python is installed only for full version
+                if (!Config.Standalone && !_dependencies.IsPythonInstalled())
                     _dependencies.DownloadAndInstallPython();
-                }
 
                 if (!_dependencies.DoesCliExist() || !_dependencies.IsCliUpToDate())
-                {
                     _dependencies.DownloadAndInstallCli();
-                }
             }
             catch (WebException ex)
             {
@@ -113,63 +111,69 @@ namespace WakaTime.Shared.ExtensionUtils
         {
             Task.Run(() =>
             {
+                // ReSharper disable once ConvertClosureToMethodGroup
                 ProcessHeartbeats();
             });
         }
 
         private void ProcessHeartbeats()
         {
-            var pythonBinary = _dependencies.GetPython();
-            if (pythonBinary != null)
+            string pythonBinary;
+
+            if (Config.Standalone)
+                pythonBinary = _dependencies.StandaloneCliLocation;
+            else
             {
-                // get first heartbeat from queue
-                var gotOne = HeartbeatQueue.TryDequeue(out var heartbeat);
-                if (!gotOne)
-                    return;
+                pythonBinary = _dependencies.GetPython();
+                if (pythonBinary == null)
+                    Logger.Error("Could not send heartbeat because python is not installed");
+            }
 
-                // remove all extra heartbeats from queue
-                var extraHeartbeats = new ArrayList();
-                while (HeartbeatQueue.TryDequeue(out var h))
-                    extraHeartbeats.Add(h);
-                var hasExtraHeartbeats = extraHeartbeats.Count > 0;
+            // get first heartbeat from queue
+            var gotOne = HeartbeatQueue.TryDequeue(out var heartbeat);
+            if (!gotOne)
+                return;
 
-                _pythonCliParameters.Key = Config.ApiKey;
-                _pythonCliParameters.Plugin =
-                    $"{_configuration.EditorName}/{_configuration.EditorVersion} {_configuration.PluginName}/{Constants.PluginVersion}";
-                _pythonCliParameters.File = heartbeat.Entity;
-                _pythonCliParameters.Time = heartbeat.Timestamp;
-                _pythonCliParameters.IsWrite = heartbeat.IsWrite;
-                _pythonCliParameters.Project = heartbeat.Project;
-                _pythonCliParameters.HasExtraHeartbeats = hasExtraHeartbeats;
+            // remove all extra heartbeats from queue
+            var extraHeartbeats = new ArrayList();
+            while (HeartbeatQueue.TryDequeue(out var h))
+                extraHeartbeats.Add(h);
+            var hasExtraHeartbeats = extraHeartbeats.Count > 0;
 
-                string extraHeartbeatsJson = null;
-                if (hasExtraHeartbeats)
-                    extraHeartbeatsJson = new JavaScriptSerializer().Serialize(extraHeartbeats);
+            _pythonCliParameters.Key = Config.ApiKey;
+            _pythonCliParameters.Plugin =
+                $"{_configuration.EditorName}/{_configuration.EditorVersion} {_configuration.PluginName}/{Constants.PluginVersion}";
+            _pythonCliParameters.File = heartbeat.Entity;
+            _pythonCliParameters.Time = heartbeat.Timestamp;
+            _pythonCliParameters.IsWrite = heartbeat.IsWrite;
+            _pythonCliParameters.Project = heartbeat.Project;
+            _pythonCliParameters.HasExtraHeartbeats = hasExtraHeartbeats;
 
-                var process = new RunProcess(pythonBinary, _pythonCliParameters.ToArray());
-                if (Config.Debug)
-                {
-                    Logger.Debug(
-                        $"[\"{pythonBinary}\", \"{string.Join("\", \"", _pythonCliParameters.ToArray(true))}\"]");
-                    process.Run(extraHeartbeatsJson);
-                    if (!string.IsNullOrEmpty(process.Output))
-                        Logger.Debug(process.Output);
-                    if (!string.IsNullOrEmpty(process.Error))
-                        Logger.Debug(process.Error);
-                }
-                else
-                    process.RunInBackground(extraHeartbeatsJson);
+            string extraHeartbeatsJson = null;
+            if (hasExtraHeartbeats)
+                extraHeartbeatsJson = new JavaScriptSerializer().Serialize(extraHeartbeats);
 
-                if (process.Success) return;
-
-                Logger.Error("Could not send heartbeat.");
+            var process = new RunProcess(pythonBinary, _pythonCliParameters.ToArray());
+            if (Config.Debug)
+            {
+                Logger.Debug(
+                    $"[\"{pythonBinary}\", \"{string.Join("\", \"", _pythonCliParameters.ToArray(true))}\"]");
+                process.Run(extraHeartbeatsJson);
                 if (!string.IsNullOrEmpty(process.Output))
-                    Logger.Error(process.Output);
+                    Logger.Debug(process.Output);
                 if (!string.IsNullOrEmpty(process.Error))
-                    Logger.Error(process.Error);
+                    Logger.Debug(process.Error);
             }
             else
-                Logger.Error("Could not send heartbeat because python is not installed");
+                process.RunInBackground(extraHeartbeatsJson);
+
+            if (process.Success) return;
+
+            Logger.Error("Could not send heartbeat.");
+            if (!string.IsNullOrEmpty(process.Output))
+                Logger.Error(process.Output);
+            if (!string.IsNullOrEmpty(process.Error))
+                Logger.Error(process.Error);
         }
 
         private bool EnoughTimePassed(DateTime now)

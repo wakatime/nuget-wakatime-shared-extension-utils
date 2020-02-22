@@ -7,5 +7,7 @@
        
         internal const string CliUrl = "https://github.com/wakatime/wakatime/archive/master.zip";
         internal const string CliFolder = @"wakatime-master\wakatime\cli.py";
+        internal const string StandaloneCli = "wakatime";
+        internal const string S3UrlPrefix = "https://wakatime-cli.s3-us-west-2.amazonaws.com/";
     }
 }

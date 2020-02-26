@@ -5,16 +5,13 @@ namespace WakaTime.Shared.ExtensionUtils
 {
     public class PythonCliParameters
     {
-        private readonly bool _standalone;
         private readonly Dependencies _dependencies;
 
-        public PythonCliParameters(bool standalone)
+        public PythonCliParameters()
         {
-            _standalone = standalone;
-            _dependencies = new Dependencies(false);
+            _dependencies = new Dependencies();
         }
 
-        private string Cli => _dependencies.CliLocation;
         public string Key { get; set; }
         public string File { get; set; }
         public string Time { get; set; }
@@ -36,9 +33,6 @@ namespace WakaTime.Shared.ExtensionUtils
                 "--plugin",
                 Plugin
             };
-
-            if (!_standalone)
-                parameters.Insert(0, Cli);
 
             if (IsWrite)
                 parameters.Add("--write");

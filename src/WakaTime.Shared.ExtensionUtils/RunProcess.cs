@@ -44,7 +44,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
         internal bool Success => Exception == null;
 
-        internal Exception Exception { get; private set; }
+        private Exception Exception { get; set; }
 
         internal void Run()
         {

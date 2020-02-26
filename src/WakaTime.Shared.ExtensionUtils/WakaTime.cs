@@ -22,7 +22,6 @@ namespace WakaTime.Shared.ExtensionUtils
         private DateTime _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
 
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue = new ConcurrentQueue<Heartbeat>();
-
         public ILogger Logger { get; }
         public ConfigFile Config { get; }
         public bool IsAsyncLoadSupported { get; }
@@ -33,14 +32,15 @@ namespace WakaTime.Shared.ExtensionUtils
             Logger = logger;
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public WakaTime(IServiceProvider serviceProvider, Configuration configuration)
         {
             _configuration = configuration;
             Config = new ConfigFile();
             Config.Read();
 
-            _pythonCliParameters = new PythonCliParameters(Config.Standalone);
-            _dependencies = new Dependencies(Config.Standalone);
+            _pythonCliParameters = new PythonCliParameters();
+            _dependencies = new Dependencies();
 
             if (Logger == null)
                 Logger = new Logger();
@@ -52,14 +52,10 @@ namespace WakaTime.Shared.ExtensionUtils
         public void InitializeAsync()
         {
             Logger.Info($"Initializing WakaTime v{Constants.PluginVersion}");
-            if (Config.Standalone) Logger.Debug("Using standalone wakatime-cli.");
+            Logger.Debug("Using standalone wakatime-cli.");
 
             try
             {
-                // Make sure python is installed only for full version
-                if (!Config.Standalone && !_dependencies.IsPythonInstalled())
-                    _dependencies.DownloadAndInstallPython();
-
                 if (!_dependencies.DoesCliExist() || !_dependencies.IsCliUpToDate())
                     _dependencies.DownloadAndInstallCli();
             }
@@ -118,17 +114,8 @@ namespace WakaTime.Shared.ExtensionUtils
 
         private void ProcessHeartbeats()
         {
-            string pythonBinary;
-
-            if (Config.Standalone)
-                pythonBinary = _dependencies.StandaloneCliLocation;
-            else
-            {
-                pythonBinary = _dependencies.GetPython();
-                if (pythonBinary == null)
-                    Logger.Error("Could not send heartbeat because python is not installed");
-            }
-
+            var pythonBinary = _dependencies.CliLocation;
+            
             // get first heartbeat from queue
             var gotOne = HeartbeatQueue.TryDequeue(out var heartbeat);
             if (!gotOne)

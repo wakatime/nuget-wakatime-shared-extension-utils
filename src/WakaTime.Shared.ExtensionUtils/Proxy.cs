@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace WakaTime.Shared.ExtensionUtils
 {

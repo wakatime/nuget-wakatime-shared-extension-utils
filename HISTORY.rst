@@ -3,6 +3,12 @@ History
 -------
 
 
+2.1.0 (2020-08-17)
+++++++++++++++++++
+
+- Add ability to get plugin version from the caller.
+
+
 2.0.0 (2020-02-25)
 ++++++++++++++++++
 

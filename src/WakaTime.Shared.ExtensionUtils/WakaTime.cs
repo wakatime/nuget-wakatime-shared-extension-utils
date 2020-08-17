@@ -42,6 +42,9 @@ namespace WakaTime.Shared.ExtensionUtils
             _pythonCliParameters = new PythonCliParameters();
             _dependencies = new Dependencies();
 
+            if (string.IsNullOrEmpty(_configuration.PluginVersion))
+                _configuration.PluginVersion = Constants.PluginVersion;
+
             if (Logger == null)
                 Logger = new Logger();
 
@@ -51,7 +54,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public void InitializeAsync()
         {
-            Logger.Info($"Initializing WakaTime v{Constants.PluginVersion}");
+            Logger.Info($"Initializing WakaTime v{(_configuration.PluginVersion)}");
             Logger.Debug("Using standalone wakatime-cli.");
 
             try
@@ -72,7 +75,7 @@ namespace WakaTime.Shared.ExtensionUtils
             _timer.Elapsed += ProcessHeartbeats;
             _timer.Start();
 
-            Logger.Info($"Finished initializing WakaTime v{Constants.PluginVersion}");
+            Logger.Info($"Finished initializing WakaTime v{_configuration.PluginVersion}");
         }
 
         public void HandleActivity(string currentFile, bool isWrite, string project)
@@ -129,7 +132,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
             _pythonCliParameters.Key = Config.ApiKey;
             _pythonCliParameters.Plugin =
-                $"{_configuration.EditorName}/{_configuration.EditorVersion} {_configuration.PluginName}/{Constants.PluginVersion}";
+                $"{_configuration.EditorName}/{_configuration.EditorVersion} {_configuration.PluginName}/{_configuration.PluginVersion}";
             _pythonCliParameters.File = heartbeat.Entity;
             _pythonCliParameters.Time = heartbeat.Timestamp;
             _pythonCliParameters.IsWrite = heartbeat.IsWrite;

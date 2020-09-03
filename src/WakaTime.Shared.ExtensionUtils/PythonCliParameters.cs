@@ -16,6 +16,8 @@ namespace WakaTime.Shared.ExtensionUtils
         public string File { get; set; }
         public string Time { get; set; }
         public string Plugin { get; set; }
+        public HeartbeatCategory Category { get; set; }
+        public EntityType EntityType { get; set; }
         public bool IsWrite { get; set; }
         public string Project { get; set; }
         public bool HasExtraHeartbeats { get; set; }
@@ -31,7 +33,11 @@ namespace WakaTime.Shared.ExtensionUtils
                 "--time",
                 Time,
                 "--plugin",
-                Plugin
+                Plugin,
+                "--category",
+                Category.ToString().Replace('_', ' '),
+                "--entity-type",
+                EntityType.ToString()
             };
 
             if (IsWrite)

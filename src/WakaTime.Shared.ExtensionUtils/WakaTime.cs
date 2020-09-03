@@ -78,9 +78,8 @@ namespace WakaTime.Shared.ExtensionUtils
             Logger.Info($"Finished initializing WakaTime v{_configuration.PluginVersion}");
         }
 
-        //Added "activity" and "entityType" as optional parameters to preserve backwards compatbility.
         public void HandleActivity(string currentFile, bool isWrite, string project,
-                                   HeartbeatCategory activity = HeartbeatCategory.coding, EntityType entityType = EntityType.file)
+                                   HeartbeatCategory activity = HeartbeatCategory.Coding, EntityType entityType = EntityType.File)
         {
             if (currentFile == null)
                 return;
@@ -107,6 +106,7 @@ namespace WakaTime.Shared.ExtensionUtils
                 Category = category,
                 EntityType = entityType
             };
+
             HeartbeatQueue.Enqueue(h);
         }
 

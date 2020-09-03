@@ -35,9 +35,9 @@ namespace WakaTime.Shared.ExtensionUtils
                 "--plugin",
                 Plugin,
                 "--category",
-                Category.ToString().Replace('_', ' '),
+                Category.GetDescription(),
                 "--entity-type",
-                EntityType.ToString()
+                EntityType.GetDescription()
             };
 
             if (IsWrite)

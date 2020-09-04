@@ -6,5 +6,7 @@
         public string Timestamp { get; set; }
         public string Project { get; set; }
         public bool IsWrite { get; set; }
+        public HeartbeatCategory? Category { get; set; }
+        public EntityType? EntityType { get; set; }
     }
 }

@@ -78,7 +78,8 @@ namespace WakaTime.Shared.ExtensionUtils
             Logger.Info($"Finished initializing WakaTime v{_configuration.PluginVersion}");
         }
 
-        public void HandleActivity(string currentFile, bool isWrite, string project)
+        public void HandleActivity(string currentFile, bool isWrite, string project,
+            HeartbeatCategory? category = null, EntityType? entityType = null)
         {
             if (currentFile == null)
                 return;
@@ -91,18 +92,22 @@ namespace WakaTime.Shared.ExtensionUtils
             _lastFile = currentFile;
             _lastHeartbeat = now;
 
-            AppendHeartbeat(currentFile, isWrite, now, project);
+            AppendHeartbeat(currentFile, isWrite, now, project, category, entityType);
         }
 
-        private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project)
+        private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project,
+            HeartbeatCategory? category, EntityType? entityType)
         {
             var h = new Heartbeat
             {
                 Entity = fileName,
                 Timestamp = ToUnixEpoch(time),
                 IsWrite = isWrite,
-                Project = project
+                Project = project,
+                Category = category,
+                EntityType = entityType
             };
+
             HeartbeatQueue.Enqueue(h);
         }
 
@@ -137,6 +142,8 @@ namespace WakaTime.Shared.ExtensionUtils
             _pythonCliParameters.Time = heartbeat.Timestamp;
             _pythonCliParameters.IsWrite = heartbeat.IsWrite;
             _pythonCliParameters.Project = heartbeat.Project;
+            _pythonCliParameters.Category = heartbeat.Category;
+            _pythonCliParameters.EntityType = heartbeat.EntityType;
             _pythonCliParameters.HasExtraHeartbeats = hasExtraHeartbeats;
 
             string extraHeartbeatsJson = null;

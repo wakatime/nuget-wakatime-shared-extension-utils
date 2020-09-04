@@ -4,20 +4,13 @@ using System.Linq;
 namespace WakaTime.Shared.ExtensionUtils
 {
     public class PythonCliParameters
-    {
-        private readonly Dependencies _dependencies;
-
-        public PythonCliParameters()
-        {
-            _dependencies = new Dependencies();
-        }
-
+    {        
         public string Key { get; set; }
         public string File { get; set; }
         public string Time { get; set; }
         public string Plugin { get; set; }
-        public HeartbeatCategory Category { get; set; }
-        public EntityType EntityType { get; set; }
+        public HeartbeatCategory? Category { get; set; }
+        public EntityType? EntityType { get; set; }
         public bool IsWrite { get; set; }
         public string Project { get; set; }
         public bool HasExtraHeartbeats { get; set; }
@@ -33,15 +26,20 @@ namespace WakaTime.Shared.ExtensionUtils
                 "--time",
                 Time,
                 "--plugin",
-                Plugin,
-                "--category",
-                Category.GetDescription(),
-                "--entity-type",
-                EntityType.GetDescription()
+                Plugin                
             };
 
-            if (IsWrite)
-                parameters.Add("--write");
+            if (Category != null)
+            {
+                parameters.Add("--category");
+                parameters.Add(Category.GetDescription());
+            }
+
+            if (EntityType != null)
+            {
+                parameters.Add("--entity-type");
+                parameters.Add(EntityType.GetDescription());
+            }            
 
             // ReSharper disable once InvertIf
             if (!string.IsNullOrEmpty(Project))
@@ -49,6 +47,9 @@ namespace WakaTime.Shared.ExtensionUtils
                 parameters.Add("--project");
                 parameters.Add(Project);
             }
+
+            if (IsWrite)
+                parameters.Add("--write");
 
             if (HasExtraHeartbeats)
                 parameters.Add("--extra-heartbeats");

@@ -79,7 +79,7 @@ namespace WakaTime.Shared.ExtensionUtils
         }
 
         public void HandleActivity(string currentFile, bool isWrite, string project,
-                                   HeartbeatCategory activity = HeartbeatCategory.Coding, EntityType entityType = EntityType.File)
+            HeartbeatCategory? category = null, EntityType? entityType = null)
         {
             if (currentFile == null)
                 return;
@@ -92,10 +92,11 @@ namespace WakaTime.Shared.ExtensionUtils
             _lastFile = currentFile;
             _lastHeartbeat = now;
 
-            AppendHeartbeat(currentFile, isWrite, now, project, activity, entityType);
+            AppendHeartbeat(currentFile, isWrite, now, project, category, entityType);
         }
 
-        private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project, HeartbeatCategory category, EntityType entityType)
+        private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project,
+            HeartbeatCategory? category, EntityType? entityType)
         {
             var h = new Heartbeat
             {

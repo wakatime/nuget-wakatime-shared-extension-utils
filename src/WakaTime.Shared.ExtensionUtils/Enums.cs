@@ -11,31 +11,22 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         [Description("coding")]
         Coding,
-
         [Description("building")]
         Building,
-
         [Description("indexing")]
         Indexing,
-
         [Description("debugging")]
         Debugging,
-
-        [Description("running_tests")]
+        [Description("running tests")]
         RunningTests,
-
-        [Description("writing_tests")]
+        [Description("writing tests")]
         WritingTests,
-
-        [Description("manual_testing")]
+        [Description("manual testing")]
         ManualTesting,
-
-        [Description("code_reviewing")]
+        [Description("code reviewing")]
         CodeReviewing,
-
         [Description("browsing")]
         Browsing,
-
         [Description("designing")]
         Designing
     }
@@ -44,10 +35,8 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         [Description("file")]
         File,
-
         [Description("domain")]
         Domain,
-
         [Description("app")]
         App
     }

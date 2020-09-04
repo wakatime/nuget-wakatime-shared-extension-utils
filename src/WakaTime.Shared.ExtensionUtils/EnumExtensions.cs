@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
-    public static class Extensions
+    public static class EnumExtensions
     {
         public static string GetDescription(this Enum e)
         {

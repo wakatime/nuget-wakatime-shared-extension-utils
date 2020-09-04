@@ -135,6 +135,8 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Dependencies.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="EnumExtensions.cs" />
     <Compile Include="GuidList.cs" />
     <Compile Include="Heartbeat.cs" />
     <Compile Include="ILogger.cs" />

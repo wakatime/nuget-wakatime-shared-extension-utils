@@ -3,10 +3,16 @@ History
 -------
 
 
+2.3.0 (2020-10-03)
+++++++++++++++++++
+
+- Read status bar config keys from configuration file.
+
+
 2.2.0 (2020-09-04)
 ++++++++++++++++++
 
-- Add ability to get plugin version from the caller.
+- Add category and entity-type parameters.
 
 
 2.1.0 (2020-08-17)

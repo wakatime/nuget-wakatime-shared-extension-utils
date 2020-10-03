@@ -9,6 +9,8 @@ namespace WakaTime.Shared.ExtensionUtils
         public string ApiKey { get; set; }
         public string Proxy { get; set; }
         public bool Debug { get; set; }
+        public bool StatusBarEnabled { get; set; }
+        public bool StatusBarCodingActivity { get; set; }        
 
         private readonly string _configFilepath;
 
@@ -30,11 +32,23 @@ namespace WakaTime.Shared.ExtensionUtils
                 ? ret.ToString()
                 : string.Empty;
 
-            // ReSharper disable once InvertIf
             if (NativeMethods.GetPrivateProfileString("settings", "debug", "", ret, 2083, _configFilepath) > 0)
             {
                 if (bool.TryParse(ret.ToString(), out var debug))
                     Debug = debug;
+            }
+
+            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_enabled", "", ret, 2083, _configFilepath) > 0)
+            {
+                if (bool.TryParse(ret.ToString(), out var enabled))
+                    StatusBarEnabled = enabled;
+            }
+
+            // ReSharper disable once InvertIf
+            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_coding_activity", "", ret, 2083, _configFilepath) > 0)
+            {
+                if (bool.TryParse(ret.ToString(), out var enabled))
+                    StatusBarCodingActivity = enabled;
             }
         }
 
@@ -46,6 +60,8 @@ namespace WakaTime.Shared.ExtensionUtils
 
             NativeMethods.WritePrivateProfileString("settings", "proxy", Proxy.Trim(), _configFilepath);
             NativeMethods.WritePrivateProfileString("settings", "debug", Debug.ToString().ToLower(), _configFilepath);
+            NativeMethods.WritePrivateProfileString("settings", "status_bar_enabled", StatusBarEnabled.ToString().ToLower(), _configFilepath);
+            NativeMethods.WritePrivateProfileString("settings", "status_bar_coding_activity", StatusBarCodingActivity.ToString().ToLower(), _configFilepath);
         }
 
         private static string GetConfigFilePath()

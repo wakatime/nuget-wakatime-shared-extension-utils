@@ -15,7 +15,7 @@ namespace WakaTime.Shared.ExtensionUtils
             _logger = new Logger();
         }
 
-        private static string AppDataDirectory
+        public static string AppDataDirectory
         {
             get
             {

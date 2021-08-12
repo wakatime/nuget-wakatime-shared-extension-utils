@@ -14,7 +14,4 @@
     <copyright>Copyright 2019</copyright>
     <tags>wakatime plugin extension</tags>
   </metadata>
-  <files>
-    <file src="..\..\lib\**" target="lib" />
-  </files>
 </package>

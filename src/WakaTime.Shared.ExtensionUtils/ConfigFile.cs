@@ -10,13 +10,14 @@ namespace WakaTime.Shared.ExtensionUtils
         public string Proxy { get; set; }
         public bool Debug { get; set; }
         public bool StatusBarEnabled { get; set; }
-        public bool StatusBarCodingActivity { get; set; }        
+        public bool StatusBarCodingActivity { get; set; }
 
         private readonly string _configFilepath;
 
         public ConfigFile()
         {
             _configFilepath = GetConfigFilePath();
+
             Read();
         }
 
@@ -32,24 +33,18 @@ namespace WakaTime.Shared.ExtensionUtils
                 ? ret.ToString()
                 : string.Empty;
 
-            if (NativeMethods.GetPrivateProfileString("settings", "debug", "", ret, 2083, _configFilepath) > 0)
-            {
-                if (bool.TryParse(ret.ToString(), out var debug))
-                    Debug = debug;
-            }
+            if (NativeMethods.GetPrivateProfileString("settings", "debug", "", ret, 2083, _configFilepath) > 0 &&
+                bool.TryParse(ret.ToString(), out var debug))
+                Debug = debug;
 
-            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_enabled", "", ret, 2083, _configFilepath) > 0)
-            {
-                if (bool.TryParse(ret.ToString(), out var enabled))
-                    StatusBarEnabled = enabled;
-            }
+            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_enabled", "", ret, 2083, _configFilepath) > 0 &&
+                bool.TryParse(ret.ToString(), out var statusBarEnabled))
+                StatusBarEnabled = statusBarEnabled;
 
             // ReSharper disable once InvertIf
-            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_coding_activity", "", ret, 2083, _configFilepath) > 0)
-            {
-                if (bool.TryParse(ret.ToString(), out var enabled))
-                    StatusBarCodingActivity = enabled;
-            }
+            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_coding_activity", "", ret, 2083, _configFilepath) > 0 &&
+            bool.TryParse(ret.ToString(), out var statusBarCodingActivityEnabled))
+                StatusBarCodingActivity = statusBarCodingActivityEnabled;
         }
 
         // ReSharper disable once UnusedMember.Global
@@ -67,6 +62,7 @@ namespace WakaTime.Shared.ExtensionUtils
         private static string GetConfigFilePath()
         {
             var homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
             return Path.Combine(homeFolder, ".wakatime.cfg");
         }
     }

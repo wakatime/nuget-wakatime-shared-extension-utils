@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-// ReSharper disable UnusedMember.Global
 
 namespace WakaTime.Shared.ExtensionUtils
 {
@@ -35,5 +34,13 @@ namespace WakaTime.Shared.ExtensionUtils
         Domain,
         [Description("app")]
         App
+    }
+
+    public enum LogLevel
+    {
+        Debug = 1,
+        Info,
+        Warning,
+        HandledException
     }
 }

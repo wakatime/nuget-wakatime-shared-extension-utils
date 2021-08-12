@@ -8,7 +8,7 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         public static string GetDescription(this Enum e)
         {
-            var attr = (DescriptionAttribute) e.GetType().GetField(e.ToString())
+            var attr = (DescriptionAttribute)e.GetType().GetField(e.ToString())
                 .GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
             return attr?.Description ?? e.ToString();
         }

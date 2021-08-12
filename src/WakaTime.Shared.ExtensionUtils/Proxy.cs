@@ -9,11 +9,10 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly ConfigFile _config;
         private readonly ILogger _logger;
 
-        public Proxy()
+        public Proxy(ILogger logger)
         {
+            _logger = logger;
             _config = new ConfigFile();
-            _config.Read();
-            _logger = new Logger();
         }
 
         public WebProxy Get()
@@ -24,7 +23,8 @@ namespace WakaTime.Shared.ExtensionUtils
             {
                 if (string.IsNullOrEmpty(_config.Proxy))
                 {
-                    _logger.Debug("No proxy will be used. It's either not set or badly formatted.");
+                    _logger.Debug("No proxy will be used. It's either not set or badly formatted");
+
                     return null;
                 }
 
@@ -60,6 +60,7 @@ namespace WakaTime.Shared.ExtensionUtils
                     proxy = new WebProxy(address, port);
 
                     _logger.Debug("A proxy will be used.");
+
                     return proxy;
                 }
 

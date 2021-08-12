@@ -79,6 +79,7 @@ namespace WakaTime.Shared.ExtensionUtils
                     {
                         var stdOut = new StringBuilder();
                         var stdErr = new StringBuilder();
+
                         if (process != null)
                         {
                             process.OutputDataReceived += (s, e) => stdOut.Append(e.Data);

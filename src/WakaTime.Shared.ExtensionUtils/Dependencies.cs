@@ -10,9 +10,12 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         private readonly ILogger _logger;
 
-        public Dependencies()
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        internal string CliLocation => Path.Combine(AppDataDirectory, Constants.CliFolder);
+
+        public Dependencies(ILogger logger)
         {
-            _logger = new Logger();
+            _logger = logger;
         }
 
         public static string AppDataDirectory
@@ -29,9 +32,6 @@ namespace WakaTime.Shared.ExtensionUtils
                 return appFolder;
             }
         }
-
-        // ReSharper disable once MemberCanBeMadeStatic.Global
-        internal string CliLocation => Path.Combine(AppDataDirectory, Constants.CliFolder);
 
         private string LatestWakaTimeCliVersion()
         {
@@ -91,9 +91,11 @@ namespace WakaTime.Shared.ExtensionUtils
             var process = new RunProcess(CliLocation, "--version");
 
             process.Run();
+
             if (!process.Success)
             {
                 _logger.Error(process.Error);
+
                 return false;
             }
 
@@ -105,7 +107,8 @@ namespace WakaTime.Shared.ExtensionUtils
 
             if (currentVersion.Equals(latestVersion))
             {
-                _logger.Info("wakatime-cli is up to date.");
+                _logger.Info("wakatime-cli is up to date");
+
                 return true;
             }
 
@@ -114,22 +117,22 @@ namespace WakaTime.Shared.ExtensionUtils
             return false;
         }
 
-        private static WebClient GetWebClient()
+        private WebClient GetWebClient()
         {
             if (!ServicePointManager.SecurityProtocol.HasFlag(SecurityProtocolType.Tls12))
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-            var proxy = new Proxy().Get();
+            var proxy = new Proxy(_logger).Get();
             return new WebClient { Proxy = proxy };
         }
 
-        private static void DownloadFile(string url, string saveAs)
+        private void DownloadFile(string url, string saveAs)
         {
             var client = GetWebClient();
             client.DownloadFile(url, saveAs);
         }
 
-        private static string DownloadString(string url)
+        private string DownloadString(string url)
         {
             var client = GetWebClient();
             return client.DownloadString(url).Trim();

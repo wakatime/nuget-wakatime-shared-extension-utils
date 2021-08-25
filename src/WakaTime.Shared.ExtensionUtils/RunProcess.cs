@@ -8,14 +8,16 @@ namespace WakaTime.Shared.ExtensionUtils
     internal class RunProcess
     {
         private readonly string _program;
-        private readonly string[] _arguments;
+        private readonly string _arguments;
         private string _stdin;
         private bool _captureOutput;
 
         internal RunProcess(string program, params string[] arguments)
         {
             _program = program;
-            _arguments = arguments;
+            _arguments = arguments
+                .Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
+                .TrimEnd(' ');
             _captureOutput = true;
         }
 
@@ -58,7 +60,7 @@ namespace WakaTime.Shared.ExtensionUtils
                     RedirectStandardInput = _stdin != null,
                     FileName = _program,
                     CreateNoWindow = true,
-                    Arguments = GetArgumentString(),
+                    Arguments = _arguments,
                 };
 
                 using (var process = Process.Start(procInfo))
@@ -102,12 +104,6 @@ namespace WakaTime.Shared.ExtensionUtils
                 Error = ex.Message;
                 Exception = ex;
             }
-        }
-
-        private string GetArgumentString()
-        {
-            var args = _arguments.Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ");
-            return args.TrimEnd(' ');
         }
     }
 }

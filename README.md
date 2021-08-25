@@ -12,10 +12,10 @@ Installation
 
 2. Find for `WakaTime.Shared.ExtensionUtils`
 
-.Net Framework
+.Net Version
 --------------------------------
 
-* Minimum v4.8
+* .Net Standard 2.0
 
 Contributing
 ------------

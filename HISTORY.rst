@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.0 (2021-08-25)
+++++++++++++++++++
+
+- Download wakatime-cli go version and as fallback download standalone python cli.
+
+
 3.0.0 (2021-08-12)
 ++++++++++++++++++
 

@@ -1,69 +1,48 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
     public class ConfigFile
     {
-        public string ApiKey { get; set; }
-        public string Proxy { get; set; }
-        public bool Debug { get; set; }
-        public bool StatusBarEnabled { get; set; }
-        public bool StatusBarCodingActivity { get; set; }
+        public readonly string ConfigFilepath;
 
-        private readonly string _configFilepath;
-
-        public ConfigFile()
+        public ConfigFile(string configFilepath)
         {
-            _configFilepath = GetConfigFilePath();
-
-            Read();
+            ConfigFilepath = configFilepath;
         }
 
-        public void Read()
+        public string GetSetting(string key, string section = "settings")
         {
-            var ret = new StringBuilder(2083);
+            var ret = new StringBuilder(255);
 
-            ApiKey = NativeMethods.GetPrivateProfileString("settings", "api_key", "", ret, 2083, _configFilepath) > 0
+            return NativeMethods.GetPrivateProfileString(section, key, "", ret, 255, ConfigFilepath) > 0
                 ? ret.ToString()
                 : string.Empty;
-
-            Proxy = NativeMethods.GetPrivateProfileString("settings", "proxy", "", ret, 2083, _configFilepath) > 0
-                ? ret.ToString()
-                : string.Empty;
-
-            if (NativeMethods.GetPrivateProfileString("settings", "debug", "", ret, 2083, _configFilepath) > 0 &&
-                bool.TryParse(ret.ToString(), out var debug))
-                Debug = debug;
-
-            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_enabled", "", ret, 2083, _configFilepath) > 0 &&
-                bool.TryParse(ret.ToString(), out var statusBarEnabled))
-                StatusBarEnabled = statusBarEnabled;
-
-            // ReSharper disable once InvertIf
-            if (NativeMethods.GetPrivateProfileString("settings", "status_bar_coding_activity", "", ret, 2083, _configFilepath) > 0 &&
-            bool.TryParse(ret.ToString(), out var statusBarCodingActivityEnabled))
-                StatusBarCodingActivity = statusBarCodingActivityEnabled;
         }
 
-        // ReSharper disable once UnusedMember.Global
-        public void Save()
+        public bool GetSettingAsBoolean(string key, bool @default = false, string section = "settings")
         {
-            if (!string.IsNullOrEmpty(ApiKey))
-                NativeMethods.WritePrivateProfileString("settings", "api_key", ApiKey.Trim(), _configFilepath);
+            var ret = new StringBuilder(255);
 
-            NativeMethods.WritePrivateProfileString("settings", "proxy", Proxy.Trim(), _configFilepath);
-            NativeMethods.WritePrivateProfileString("settings", "debug", Debug.ToString().ToLower(), _configFilepath);
-            NativeMethods.WritePrivateProfileString("settings", "status_bar_enabled", StatusBarEnabled.ToString().ToLower(), _configFilepath);
-            NativeMethods.WritePrivateProfileString("settings", "status_bar_coding_activity", StatusBarCodingActivity.ToString().ToLower(), _configFilepath);
+            if (NativeMethods.GetPrivateProfileString(section, key, @default.ToString(), ret, 255, ConfigFilepath) > 0)
+            {
+                if (bool.TryParse(ret.ToString(), out var parsed))
+                    return parsed;
+            }
+
+            return @default;
         }
 
-        private static string GetConfigFilePath()
+        public void SaveSetting(string section, string key, string value)
         {
-            var homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (bool.TryParse(value.Trim(), out _))
+            {
+                NativeMethods.WritePrivateProfileString(section, key, value.Trim().ToLower(), ConfigFilepath);
+                return;
+            }
 
-            return Path.Combine(homeFolder, ".wakatime.cfg");
+
+            NativeMethods.WritePrivateProfileString(section, key, value.Trim(), ConfigFilepath);
         }
     }
 }

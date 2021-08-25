@@ -9,10 +9,10 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly ConfigFile _config;
         private readonly ILogger _logger;
 
-        public Proxy(ILogger logger)
+        public Proxy(ILogger logger, string configFilepath)
         {
             _logger = logger;
-            _config = new ConfigFile();
+            _config = new ConfigFile(configFilepath);
         }
 
         public WebProxy Get()
@@ -21,45 +21,36 @@ namespace WakaTime.Shared.ExtensionUtils
 
             try
             {
-                if (string.IsNullOrEmpty(_config.Proxy))
+                var proxyStr = _config.GetSetting("proxy");
+                if (string.IsNullOrEmpty(proxyStr))
                 {
-                    _logger.Debug("No proxy will be used. It's either not set or badly formatted");
+                    _logger.Debug("No proxy will be used. It's not set.");
 
                     return null;
                 }
 
-                var proxyStr = _config.Proxy;
-
-                // Regex that matches proxy address with authentication
-                var regProxyWithAuth = new Regex(@"\s*(https?:\/\/)?([^\s:]+):([^\s:]+)@([^\s:]+):(\d+)\s*");
-                var match = regProxyWithAuth.Match(proxyStr);
+                var proxyRegex = new Regex(@"\s*((?<protocol>https?|socks5):\/\/)?(([^\s:]+):([^\s:]+)@)?([^\s:]+):(\d+)\s*");
+                var match = proxyRegex.Match(proxyStr);
 
                 if (match.Success)
                 {
-                    var username = match.Groups[2].Value;
-                    var password = match.Groups[3].Value;
-                    var address = match.Groups[4].Value;
-                    var port = match.Groups[5].Value;
+                    var protocol = match.Groups["protocol"].Success ? match.Groups["protocol"].Value : null;
+                    var address = match.Groups[5].Value;
+                    var port = match.Groups[6].Value;
 
-                    var credentials = new NetworkCredential(username, password);
-                    proxy = new WebProxy(string.Join(":", address, port), true, null, credentials);
+                    proxy = new WebProxy(
+                        protocol != null ? $"{protocol}://{address}:{port}" : $"{address}:{port}",
+                        true, null);
+
+                    if (match.Groups["3"].Success)
+                    {
+                        var username = match.Groups[3].Value;
+                        var password = match.Groups[4].Value;
+
+                        proxy.Credentials = new NetworkCredential(username, password);
+                    }
 
                     _logger.Debug("A proxy with authentication will be used.");
-                    return proxy;
-                }
-
-                // Regex that matches proxy address and port(no authentication)
-                var regProxy = new Regex(@"\s*(https?:\/\/)?([^\s@]+):(\d+)\s*");
-                match = regProxy.Match(proxyStr);
-
-                if (match.Success)
-                {
-                    var address = match.Groups[2].Value;
-                    var port = int.Parse(match.Groups[3].Value);
-
-                    proxy = new WebProxy(address, port);
-
-                    _logger.Debug("A proxy will be used.");
 
                     return proxy;
                 }

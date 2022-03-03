@@ -14,7 +14,6 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly CliParameters _cliParameters;
         private readonly Dependencies _dependencies;
         private readonly Timer _timer;
-        private readonly bool _newBetaCli;
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
@@ -46,8 +45,6 @@ namespace WakaTime.Shared.ExtensionUtils
             _dependencies = new Dependencies(logger, Config);
             _timer = new Timer(10000);
             _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
-
-            _newBetaCli = Config.GetSettingAsBoolean("new_beta_cli", true);
         }
 
         public async Task InitializeAsync()
@@ -133,7 +130,7 @@ namespace WakaTime.Shared.ExtensionUtils
         {
             try
             {
-                var binary = _dependencies.GetCliLocation(_newBetaCli);
+                var binary = _dependencies.GetCliLocation();
 
                 // get first heartbeat from queue
                 var gotOne = HeartbeatQueue.TryDequeue(out var heartbeat);

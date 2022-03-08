@@ -14,13 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         private readonly ILogger _logger;
         private readonly ConfigFile _configFile;
-        private readonly bool _newBetaCli;
 
         public Dependencies(ILogger logger, ConfigFile configFile)
         {
             _logger = logger;
             _configFile = configFile;
-            _newBetaCli = _configFile.GetSettingAsBoolean("new_beta_cli", true);
         }
 
         public static string HomeLocation
@@ -51,22 +49,13 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public async Task CheckAndInstall()
         {
-            if (_newBetaCli)
-                await CheckAndInstallCli();
-            else
-                await CheckAndInstallLegacyCli();
+            await CheckAndInstallCli();
         }
 
         private async Task CheckAndInstallCli()
         {
             if (!IsCliInstalled(true) || !await IsCliLatest())
                 await InstallCli();
-        }
-
-        private async Task CheckAndInstallLegacyCli()
-        {
-            if (!IsCliInstalled(false) || !await IsLegacyCliLatest())
-                await InstallLegacyCli();
         }
 
         private async Task InstallCli()
@@ -82,40 +71,6 @@ namespace WakaTime.Shared.ExtensionUtils
             // Download wakatime-cli
             await DownloadFile(url, localZipFile);
             _logger.Debug($"Finished downloading wakatime-cli {version}");
-
-            // Extract wakatime-cli zip file
-            _logger.Debug($"Extracting wakatime-cli to: {ResourcesLocation}");
-            using (var archive = ZipFile.OpenRead(localZipFile))
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    entry.ExtractToFile(Path.Combine(ResourcesLocation, entry.FullName), true);
-                }
-            }
-            _logger.Debug("Finished extracting wakatime-cli");
-
-            try
-            {
-                File.Delete(localZipFile);
-            }
-            catch
-            { /* ignored */ }
-        }
-
-        private async Task InstallLegacyCli()
-        {
-            _logger.Debug("Downloading legacy python wakatime-cli...");
-
-            var url = $"{GetS3BucketUrl()}/wakatime-cli.zip";
-
-            var localZipFile = Path.Combine(ResourcesLocation, "wakatime-cli.zip");
-
-            // Download wakatime-cli
-            await DownloadFile(url, localZipFile);
-            _logger.Debug($"Finished downloading wakatime-cli");
-
-            // Remove old folder if it exists
-            RecursiveDelete(Path.Combine(ResourcesLocation, "wakatime-cli"));
 
             // Extract wakatime-cli zip file
             _logger.Debug($"Extracting wakatime-cli to: {ResourcesLocation}");
@@ -189,28 +144,9 @@ namespace WakaTime.Shared.ExtensionUtils
             return null;
         }
 
-        private async Task<string> GetLatestLegacyCliVersion()
-        {
-            try
-            {
-                var url = $"{GetS3BucketUrl()}/current_version.txt";
-                var client = GetHttpClient();
-                var version = await client.GetStringAsync(url);
-
-                return version.Trim();
-
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Error getting latest legacy wakatime cli version from S3", ex);
-            }
-
-            return null;
-        }
-
         private async Task<bool> IsCliLatest()
         {
-            var process = new RunProcess(GetCliLocation(true), "--version");
+            var process = new RunProcess(GetCliLocation(), "--version");
 
             process.Run();
 
@@ -239,64 +175,21 @@ namespace WakaTime.Shared.ExtensionUtils
             return false;
         }
 
-        private async Task<bool> IsLegacyCliLatest()
-        {
-            var process = new RunProcess(GetCliLocation(false), "--version");
-
-            process.Run();
-
-            if (!process.Success)
-            {
-                _logger.Error(process.Error);
-
-                return false;
-            }
-
-            var currentVersion = process.Output.Trim();
-            _logger.Debug($"Current wakatime-cli version is {currentVersion}");
-            _logger.Debug("Checking for updates to wakatime-cli...");
-
-            var latestVersion = await GetLatestLegacyCliVersion();
-
-            if (currentVersion.Equals(latestVersion))
-            {
-                _logger.Info("wakatime-cli is up to date");
-                return true;
-            }
-
-            _logger.Info($"Found an updated wakatime-cli {latestVersion}");
-
-            return false;
-        }
-
-        private static string GetS3BucketUrl()
-        {
-            return Path.Combine(Constants.S3UrlPrefix,
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? $"windows-x86-{(ProcessorArchitectureHelper.Is64BitOperatingSystem ? "64" : "32")}"
-                    : "mac-x86-64");
-        }
-
         public static string GetConfigFilePath()
         {
             return Path.Combine(HomeLocation, ".wakatime.cfg");
         }
 
-        internal string GetCliLocation(bool newGoCli)
+        internal string GetCliLocation()
         {
-            var ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
-
-            if (!newGoCli)
-                return Path.Combine(ResourcesLocation, "wakatime-cli", $"wakatime-cli{ext}");
-
             var arch = ProcessorArchitectureHelper.Is64BitOperatingSystem ? "amd64" : "386";
-
+            var ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
             return Path.Combine(ResourcesLocation, $"wakatime-cli-windows-{arch}{ext}");
         }
 
-        private bool IsCliInstalled(bool newGoCli)
+        private bool IsCliInstalled()
         {
-            return File.Exists(GetCliLocation(newGoCli));
+            return File.Exists(GetCliLocation());
         }
 
         private HttpClient GetHttpClient()

@@ -54,7 +54,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
         private async Task CheckAndInstallCli()
         {
-            if (!IsCliInstalled(true) || !await IsCliLatest())
+            if (!IsCliInstalled() || !await IsCliLatest())
                 await InstallCli();
         }
 

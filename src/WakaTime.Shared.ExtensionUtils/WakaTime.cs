@@ -63,6 +63,7 @@ namespace WakaTime.Shared.ExtensionUtils
                 _heartbeatsProcessTimer.Elapsed += ProcessHeartbeats;
                 _heartbeatsProcessTimer.Start();
 
+                await Task.Run(() => UpdateTodayTotalTime());
                 _todayTotalTimeUpdateTimer.Elapsed += UpdateTodayTotalTime;
                 _todayTotalTimeUpdateTimer.Start();
 

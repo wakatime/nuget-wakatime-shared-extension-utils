@@ -13,7 +13,8 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly Metadata _metadata;
         private readonly CliParameters _cliParameters;
         private readonly Dependencies _dependencies;
-        private readonly Timer _timer;
+        private readonly Timer _heartbeatsProcessTimer;
+        private readonly Timer _todayTotalTimeUpdateTimer;
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
@@ -22,6 +23,9 @@ namespace WakaTime.Shared.ExtensionUtils
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue;
 
         public ILogger Logger { get; }
+
+        public string TodayTotalTime { get; private set; } = string.Empty;
+        public event EventHandler<string> TodayTotalTimeUpdated;
 
         public WakaTime(Metadata metadata, ILogger logger)
         {
@@ -43,7 +47,8 @@ namespace WakaTime.Shared.ExtensionUtils
                 $"{_metadata.EditorName}/{_metadata.EditorVersion} {_metadata.PluginName}/{_metadata.PluginVersion}"
             };
             _dependencies = new Dependencies(logger, Config);
-            _timer = new Timer(10000);
+            _heartbeatsProcessTimer = new Timer(10000);
+            _todayTotalTimeUpdateTimer = new Timer(60000);
             _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
         }
 
@@ -55,8 +60,11 @@ namespace WakaTime.Shared.ExtensionUtils
             {
                 await _dependencies.CheckAndInstall();
 
-                _timer.Elapsed += ProcessHeartbeats;
-                _timer.Start();
+                _heartbeatsProcessTimer.Elapsed += ProcessHeartbeats;
+                _heartbeatsProcessTimer.Start();
+
+                _todayTotalTimeUpdateTimer.Elapsed += UpdateTodayTotalTime;
+                _todayTotalTimeUpdateTimer.Start();
 
                 Logger.Info($"Finished initializing WakaTime v{_metadata.PluginVersion}");
             }
@@ -190,13 +198,50 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
+        private void UpdateTodayTotalTime(object sender, ElapsedEventArgs e)
+        {
+            _ = Task.Run(() =>
+              {
+                  // ReSharper disable once ConvertClosureToMethodGroup
+                  UpdateTodayTotalTime();
+              });
+        }
+
+        private void UpdateTodayTotalTime()
+        {
+            var binary = _dependencies.GetCliLocation();
+
+            var runProcess = new RunProcess(
+                binary,
+                "--key", Config.GetSetting("api_key"),
+                "--today",
+                "--today-hide-categories", "true"
+                );
+
+            runProcess.Run();
+
+            string output = runProcess.Output.Trim();
+            if (!string.IsNullOrEmpty(output))
+            {
+                TodayTotalTime = output;
+                TodayTotalTimeUpdated?.Invoke(this, output);
+            }
+        }
+
         public void Dispose()
         {
-            if (_timer != null)
+            if (_heartbeatsProcessTimer != null)
             {
-                _timer.Stop();
-                _timer.Elapsed -= ProcessHeartbeats;
-                _timer.Dispose();
+                _heartbeatsProcessTimer.Stop();
+                _heartbeatsProcessTimer.Elapsed -= ProcessHeartbeats;
+                _heartbeatsProcessTimer.Dispose();
+            }
+
+            if (_todayTotalTimeUpdateTimer != null)
+            {
+                _todayTotalTimeUpdateTimer.Stop();
+                _todayTotalTimeUpdateTimer.Elapsed -= UpdateTodayTotalTime;
+                _todayTotalTimeUpdateTimer.Dispose();
             }
 
             // make sure the queue is empty	

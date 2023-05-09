@@ -64,7 +64,7 @@ namespace WakaTime.Shared.ExtensionUtils
                 catch (Exception ex)
                 {
                     if (!installed) throw;
-                    Logger.Error($"Error updating", ex);
+                    _logger.Error($"Error updating", ex);
                 }
             }
         }

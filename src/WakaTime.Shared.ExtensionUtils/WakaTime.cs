@@ -14,7 +14,7 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly CliParameters _cliParameters;
         private readonly Dependencies _dependencies;
         private readonly Timer _heartbeatsProcessTimer;
-        private readonly Timer _todayTotalTimeUpdateTimer;
+        private readonly Timer _totalTimeTodayUpdateTimer;
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
@@ -24,8 +24,8 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public ILogger Logger { get; }
 
-        public string TodayTotalTime { get; private set; } = string.Empty;
-        public event EventHandler<string> TodayTotalTimeUpdated;
+        public string TotalTimeToday { get; private set; }
+        public event EventHandler<TotalTimeTodayUpdatedEventArgs> TotalTimeTodayUpdated;
 
         public WakaTime(Metadata metadata, ILogger logger)
         {
@@ -48,7 +48,7 @@ namespace WakaTime.Shared.ExtensionUtils
             };
             _dependencies = new Dependencies(logger, Config);
             _heartbeatsProcessTimer = new Timer(10000);
-            _todayTotalTimeUpdateTimer = new Timer(60000);
+            _totalTimeTodayUpdateTimer = new Timer(60000);
             _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
         }
 
@@ -63,9 +63,9 @@ namespace WakaTime.Shared.ExtensionUtils
                 _heartbeatsProcessTimer.Elapsed += ProcessHeartbeats;
                 _heartbeatsProcessTimer.Start();
 
-                await Task.Run(() => UpdateTodayTotalTime());
-                _todayTotalTimeUpdateTimer.Elapsed += UpdateTodayTotalTime;
-                _todayTotalTimeUpdateTimer.Start();
+                await Task.Run(() => UpdateTotalTimeToday());
+                _totalTimeTodayUpdateTimer.Elapsed += UpdateTotalTimeToday;
+                _totalTimeTodayUpdateTimer.Start();
 
                 Logger.Info($"Finished initializing WakaTime v{_metadata.PluginVersion}");
             }
@@ -199,16 +199,16 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
-        private void UpdateTodayTotalTime(object sender, ElapsedEventArgs e)
+        private void UpdateTotalTimeToday(object sender, ElapsedEventArgs e)
         {
             _ = Task.Run(() =>
               {
                   // ReSharper disable once ConvertClosureToMethodGroup
-                  UpdateTodayTotalTime();
+                  UpdateTotalTimeToday();
               });
         }
 
-        private void UpdateTodayTotalTime()
+        private void UpdateTotalTimeToday()
         {
             var binary = _dependencies.GetCliLocation();
 
@@ -224,8 +224,8 @@ namespace WakaTime.Shared.ExtensionUtils
             string output = runProcess.Output.Trim();
             if (!string.IsNullOrEmpty(output))
             {
-                TodayTotalTime = output;
-                TodayTotalTimeUpdated?.Invoke(this, output);
+                TotalTimeToday = output;
+                TotalTimeTodayUpdated?.Invoke(this, new TotalTimeTodayUpdatedEventArgs(output));
             }
         }
 
@@ -238,11 +238,11 @@ namespace WakaTime.Shared.ExtensionUtils
                 _heartbeatsProcessTimer.Dispose();
             }
 
-            if (_todayTotalTimeUpdateTimer != null)
+            if (_totalTimeTodayUpdateTimer != null)
             {
-                _todayTotalTimeUpdateTimer.Stop();
-                _todayTotalTimeUpdateTimer.Elapsed -= UpdateTodayTotalTime;
-                _todayTotalTimeUpdateTimer.Dispose();
+                _totalTimeTodayUpdateTimer.Stop();
+                _totalTimeTodayUpdateTimer.Elapsed -= UpdateTotalTimeToday;
+                _totalTimeTodayUpdateTimer.Dispose();
             }
 
             // make sure the queue is empty	

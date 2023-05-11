@@ -24,7 +24,19 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public ILogger Logger { get; }
 
+        /// <summary>
+        /// A string like "3 hrs 42 mins".
+        /// </summary>
         public string TotalTimeToday { get; private set; }
+
+        /// <summary>
+        /// A string like "3 hrs 4 mins Coding, 20 mins Building, 18 mins Debugging".
+        /// </summary>
+        public string TotalTimeTodayDetailed { get; private set; }
+
+        /// <summary>
+        /// Fired when <see cref="TotalTimeToday"/> and <see cref="TotalTimeTodayDetailed"/> are updated.
+        /// </summary>
         public event EventHandler<TotalTimeTodayUpdatedEventArgs> TotalTimeTodayUpdated;
 
         public WakaTime(Metadata metadata, ILogger logger)
@@ -212,20 +224,37 @@ namespace WakaTime.Shared.ExtensionUtils
         {
             var binary = _dependencies.GetCliLocation();
 
-            var runProcess = new RunProcess(
+            var totalTimeTodayProcess = new RunProcess(
                 binary,
                 "--key", Config.GetSetting("api_key"),
                 "--today",
                 "--today-hide-categories", "true"
                 );
-
-            runProcess.Run();
-
-            string output = runProcess.Output.Trim();
-            if (!string.IsNullOrEmpty(output))
+            totalTimeTodayProcess.Run();
+            string totalTimeToday = totalTimeTodayProcess.Output.Trim();
+            Logger.Debug($"Fetched TotalTimeToday: {totalTimeToday}");
+            if (!string.IsNullOrEmpty(totalTimeToday))
             {
-                TotalTimeToday = output;
-                TotalTimeTodayUpdated?.Invoke(this, new TotalTimeTodayUpdatedEventArgs(output));
+                TotalTimeToday = totalTimeToday;
+            }
+
+            var totalTimeTodayDetailedProcess = new RunProcess(
+                binary,
+                "--key", Config.GetSetting("api_key"),
+                "--today",
+                "--today-hide-categories", "false"
+                );
+            totalTimeTodayDetailedProcess.Run();
+            string totalTimeTodayDetailed = totalTimeTodayDetailedProcess.Output.Trim();
+            Logger.Debug($"Fetched TotalTimeTodayDetailed: {totalTimeTodayDetailed}");
+            if (!string.IsNullOrEmpty(totalTimeTodayDetailed))
+            {
+                TotalTimeTodayDetailed = totalTimeTodayDetailed;
+            }
+
+            if (!(string.IsNullOrEmpty(totalTimeToday) && string.IsNullOrEmpty(totalTimeTodayDetailed)))
+            {
+                TotalTimeTodayUpdated?.Invoke(this, new TotalTimeTodayUpdatedEventArgs(TotalTimeToday, TotalTimeTodayDetailed));
             }
         }
 

@@ -13,7 +13,8 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly Metadata _metadata;
         private readonly CliParameters _cliParameters;
         private readonly Dependencies _dependencies;
-        private readonly Timer _timer;
+        private readonly Timer _heartbeatsProcessTimer;
+        private readonly Timer _totalTimeTodayUpdateTimer;
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
@@ -22,6 +23,21 @@ namespace WakaTime.Shared.ExtensionUtils
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue;
 
         public ILogger Logger { get; }
+
+        /// <summary>
+        /// A string like "3 hrs 42 mins".
+        /// </summary>
+        public string TotalTimeToday { get; private set; }
+
+        /// <summary>
+        /// A string like "3 hrs 4 mins Coding, 20 mins Building, 18 mins Debugging".
+        /// </summary>
+        public string TotalTimeTodayDetailed { get; private set; }
+
+        /// <summary>
+        /// Fired when <see cref="TotalTimeToday"/> and <see cref="TotalTimeTodayDetailed"/> are updated.
+        /// </summary>
+        public event EventHandler<TotalTimeTodayUpdatedEventArgs> TotalTimeTodayUpdated;
 
         public WakaTime(Metadata metadata, ILogger logger)
         {
@@ -43,7 +59,8 @@ namespace WakaTime.Shared.ExtensionUtils
                 $"{_metadata.EditorName}/{_metadata.EditorVersion} {_metadata.PluginName}/{_metadata.PluginVersion}"
             };
             _dependencies = new Dependencies(logger, Config);
-            _timer = new Timer(10000);
+            _heartbeatsProcessTimer = new Timer(10000);
+            _totalTimeTodayUpdateTimer = new Timer(60000);
             _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
         }
 
@@ -55,8 +72,12 @@ namespace WakaTime.Shared.ExtensionUtils
             {
                 await _dependencies.CheckAndInstall();
 
-                _timer.Elapsed += ProcessHeartbeats;
-                _timer.Start();
+                _heartbeatsProcessTimer.Elapsed += ProcessHeartbeats;
+                _heartbeatsProcessTimer.Start();
+
+                UpdateTotalTimeToday(null, null);   // Invoke the event handler immediately
+                _totalTimeTodayUpdateTimer.Elapsed += UpdateTotalTimeToday;
+                _totalTimeTodayUpdateTimer.Start();
 
                 Logger.Info($"Finished initializing WakaTime v{_metadata.PluginVersion}");
             }
@@ -190,13 +211,73 @@ namespace WakaTime.Shared.ExtensionUtils
             }
         }
 
+        private void UpdateTotalTimeToday(object sender, ElapsedEventArgs e)
+        {
+            _ = Task.Run(() =>
+              {
+                  // ReSharper disable once ConvertClosureToMethodGroup
+                  UpdateTotalTimeToday();
+              });
+        }
+
+        private void UpdateTotalTimeToday()
+        {
+            var binary = _dependencies.GetCliLocation();
+            var apiKey = Config.GetSetting("api_key");
+
+            Logger.Debug("Fetching TotalTimeToday...");
+            var totalTimeTodayProcess = new RunProcess(
+                binary,
+                "--key", apiKey,
+                "--today",
+                "--today-hide-categories", "true"
+                );
+            totalTimeTodayProcess.Run();
+            string totalTimeToday = totalTimeTodayProcess.Output.Trim();
+            Logger.Debug($"Fetched TotalTimeToday: {totalTimeToday}");
+
+            if (!string.IsNullOrEmpty(totalTimeToday))
+            {
+                TotalTimeToday = totalTimeToday;
+            }
+
+            Logger.Debug("Fetching TotalTimeTodayDetailed...");
+            var totalTimeTodayDetailedProcess = new RunProcess(
+                binary,
+                "--key", apiKey,
+                "--today",
+                "--today-hide-categories", "false"
+                );
+            totalTimeTodayDetailedProcess.Run();
+            string totalTimeTodayDetailed = totalTimeTodayDetailedProcess.Output.Trim();
+            Logger.Debug($"Fetched TotalTimeTodayDetailed: {totalTimeTodayDetailed}");
+
+            if (!string.IsNullOrEmpty(totalTimeTodayDetailed))
+            {
+                TotalTimeTodayDetailed = totalTimeTodayDetailed;
+            }
+
+            // If fetch was successful, fire "TotalTimeTodayUpdated" event
+            if (!(string.IsNullOrEmpty(totalTimeToday) && string.IsNullOrEmpty(totalTimeTodayDetailed)))
+            {
+                TotalTimeTodayUpdated?.Invoke(this, new TotalTimeTodayUpdatedEventArgs(TotalTimeToday, TotalTimeTodayDetailed));
+            }
+        }
+
         public void Dispose()
         {
-            if (_timer != null)
+            if (_heartbeatsProcessTimer != null)
             {
-                _timer.Stop();
-                _timer.Elapsed -= ProcessHeartbeats;
-                _timer.Dispose();
+                _heartbeatsProcessTimer.Stop();
+                _heartbeatsProcessTimer.Elapsed -= ProcessHeartbeats;
+                _heartbeatsProcessTimer.Dispose();
+            }
+
+            if (_totalTimeTodayUpdateTimer != null)
+            {
+                _totalTimeTodayUpdateTimer.Stop();
+                _totalTimeTodayUpdateTimer.Elapsed -= UpdateTotalTimeToday;
+                _totalTimeTodayUpdateTimer.Dispose();
             }
 
             // make sure the queue is empty	

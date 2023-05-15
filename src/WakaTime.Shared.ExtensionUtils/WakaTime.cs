@@ -223,35 +223,41 @@ namespace WakaTime.Shared.ExtensionUtils
         private void UpdateTotalTimeToday()
         {
             var binary = _dependencies.GetCliLocation();
+            var apiKey = Config.GetSetting("api_key");
 
+            Logger.Debug("Fetching TotalTimeToday...");
             var totalTimeTodayProcess = new RunProcess(
                 binary,
-                "--key", Config.GetSetting("api_key"),
+                "--key", apiKey,
                 "--today",
                 "--today-hide-categories", "true"
                 );
             totalTimeTodayProcess.Run();
             string totalTimeToday = totalTimeTodayProcess.Output.Trim();
             Logger.Debug($"Fetched TotalTimeToday: {totalTimeToday}");
+
             if (!string.IsNullOrEmpty(totalTimeToday))
             {
                 TotalTimeToday = totalTimeToday;
             }
 
+            Logger.Debug("Fetching TotalTimeTodayDetailed...");
             var totalTimeTodayDetailedProcess = new RunProcess(
                 binary,
-                "--key", Config.GetSetting("api_key"),
+                "--key", apiKey,
                 "--today",
                 "--today-hide-categories", "false"
                 );
             totalTimeTodayDetailedProcess.Run();
             string totalTimeTodayDetailed = totalTimeTodayDetailedProcess.Output.Trim();
             Logger.Debug($"Fetched TotalTimeTodayDetailed: {totalTimeTodayDetailed}");
+
             if (!string.IsNullOrEmpty(totalTimeTodayDetailed))
             {
                 TotalTimeTodayDetailed = totalTimeTodayDetailed;
             }
 
+            // If fetch was successful, fire "TotalTimeTodayUpdated" event
             if (!(string.IsNullOrEmpty(totalTimeToday) && string.IsNullOrEmpty(totalTimeTodayDetailed)))
             {
                 TotalTimeTodayUpdated?.Invoke(this, new TotalTimeTodayUpdatedEventArgs(TotalTimeToday, TotalTimeTodayDetailed));

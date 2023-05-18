@@ -3,6 +3,15 @@ History
 -------
 
 
+4.2.0 (2023-05-18)
+++++++++++++++++++
+
+- Only throw exception when installation fails.
+- Add "TodayTotalTime", "TotalTotalTime" and "TotalTimeTodayDetailed" properties.
+- Update today's coding time asynchronously when initializing.
+- Add new WakaTime logo.
+
+
 4.1.0 (2022-03-08)
 ++++++++++++++++++
 

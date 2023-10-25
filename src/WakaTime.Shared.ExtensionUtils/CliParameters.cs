@@ -44,7 +44,7 @@ namespace WakaTime.Shared.ExtensionUtils
             // ReSharper disable once InvertIf
             if (!string.IsNullOrEmpty(Project))
             {
-                parameters.Add("--project");
+                parameters.Add("--alternate-project");
                 parameters.Add(Project);
             }
 

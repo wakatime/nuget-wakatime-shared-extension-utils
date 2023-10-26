@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.2.0</Version>
+    <Version>4.2.1</Version>
     <Authors>WakaTime</Authors>
     <Description>Quantify your coding with automatic time tracking and metrics about your programming.</Description>
     <Copyright>Copyright © WakaTime 2021</Copyright>
     <PackageProjectUrl>https://github.com/wakatime/nuget-wakatime-shared-extension-utils</PackageProjectUrl>
     <PackageTags>wakatime, plugin, extension, visual studio</PackageTags>
-    <AssemblyVersion>4.2.0</AssemblyVersion>
-    <FileVersion>4.2.0</FileVersion>
+    <AssemblyVersion>4.2.1</AssemblyVersion>
+    <FileVersion>4.2.1</FileVersion>
     <PackageIcon>wakatime-120.png</PackageIcon>
     <PackageIconUrl />
     <SignAssembly>true</SignAssembly>

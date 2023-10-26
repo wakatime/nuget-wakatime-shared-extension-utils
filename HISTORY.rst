@@ -3,6 +3,12 @@ History
 -------
 
 
+4.2.1 (2023-10-26)
+++++++++++++++++++
+
+- Use alternate project to keep project consistent across IDEs.
+
+
 4.2.0 (2023-05-18)
 ++++++++++++++++++
 

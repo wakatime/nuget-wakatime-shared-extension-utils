@@ -8,6 +8,7 @@
         #region Static Fields and Const
 
         private const string CliFlagName = "--write";
+        private const string JsonFlagName = "is_write";
 
         #endregion
 
@@ -16,9 +17,10 @@
         /// </summary>
         /// <remarks>When set, tells api this heartbeat was triggered from writing to a file.</remarks>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
-        public static FlagHolder AddFlagWrite(this FlagHolder flagHolder)
+        /// <param name="value">Boolean value to set the flag to. True by default.</param>
+        public static FlagHolder AddFlagWrite(this FlagHolder flagHolder, bool value = true)
         {
-            flagHolder.AddFlag(new CliFlag(CliFlagName));
+            flagHolder.AddFlag(new CliFlag<bool>(CliFlagName, JsonFlagName, value));
             return flagHolder;
         }
 

@@ -8,6 +8,7 @@
         #region Static Fields and Const
 
         private const string CliFlagName = "--alternate-language";
+        private const string JsonFlagName = "alternate_language";
 
         #endregion
 
@@ -19,7 +20,7 @@
         /// <seealso cref="FlagLanguage.AddFlagLanguage" />
         public static FlagHolder AddFlagLanguageAlternate(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, value));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
             return flagHolder;
         }
 

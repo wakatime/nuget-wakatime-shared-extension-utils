@@ -8,6 +8,7 @@
         #region Static Fields and Const
 
         private const string CliFlagName = "--alternate-project";
+        private const string JsonFlagName = "alternate_project";
 
         #endregion
 
@@ -19,7 +20,7 @@
         /// <seealso cref="FlagProject.AddFlagProject" />
         public static FlagHolder AddFlagProjectAlternate(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, value));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
             return flagHolder;
         }
 

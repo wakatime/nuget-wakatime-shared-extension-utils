@@ -7,7 +7,6 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         public static CliHeartbeat CreateHeartbeat(this WakaTime wakaTime)
         {
             var beat = new CliHeartbeat(wakaTime);
-            foreach (var flag in wakaTime.CommonFlagsHolder.Flags.Values) beat.AddFlag(flag);
             return beat;
         }
         
@@ -15,9 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
                                                    HeartbeatCategory? category = null, EntityType? entityType = null)
         {
             var beat = new CliHeartbeat(wakaTime);
-            foreach (var flag in wakaTime.CommonFlagsHolder.Flags.Values) beat.AddFlag(flag);
-            
+            beat.AddFlagEntity(currentFile);
+            beat.AddFlagWrite(isWrite);
+            beat.AddFlagProjectAlternate(project);
             if(category.HasValue) beat.AddFlagCategory(category.Value);
+            if(entityType.HasValue) beat.AddFlagEntityType(entityType.Value);
             
             return beat;
         }

@@ -6,8 +6,9 @@
     public static class FlagEntityType
     {
         #region Static Fields and Const
-
+        
         private const string CliFlagName = "--entity-type";
+        private const string JsonFlagName = "entity_type";
 
         #endregion
 
@@ -22,7 +23,7 @@
         public static FlagHolder AddFlagEntityType(this FlagHolder flagHolder, EntityType value)
         {
             string entityType = value.GetDescription();
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, entityType));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, entityType));
             return flagHolder;
         }
 

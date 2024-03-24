@@ -8,6 +8,7 @@
         #region Static Fields and Const
 
         private const string CliFlagName = "--plugin";
+        private const string JsonFlagName = "plugin";
 
         #endregion
 
@@ -29,7 +30,7 @@
         /// </remarks>
         public static FlagHolder AddFlagPlugin(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, value));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value, false));
             return flagHolder;
         }
 

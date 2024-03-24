@@ -19,13 +19,14 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly Timer _heartbeatsProcessTimer;
         private readonly Timer _totalTimeTodayUpdateTimer;
         
-        public FlagHolder CommonFlagsHolder { get; }
+        internal FlagHolder CommonFlagsHolder { get; }
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
 
         public readonly ConfigFile Config;
         public readonly ConcurrentQueue<Heartbeat> HeartbeatQueue;
+        public readonly ConcurrentQueue<CliHeartbeat> CliHeartbeatQueue;
 
         public ILogger Logger { get; }
 
@@ -57,6 +58,7 @@ namespace WakaTime.Shared.ExtensionUtils
             
             Config = new ConfigFile(Dependencies.GetConfigFilePath());
             HeartbeatQueue = new ConcurrentQueue<Heartbeat>();
+            CliHeartbeatQueue = new ConcurrentQueue<CliHeartbeat>();
             CommonFlagsHolder = new FlagHolder(this);
             
             _dependencies = new Dependencies(logger, Config);
@@ -117,13 +119,19 @@ namespace WakaTime.Shared.ExtensionUtils
         public void HandleActivity(string currentFile, bool isWrite, string project,
             HeartbeatCategory? category = null, EntityType? entityType = null)
         {
-            if (currentFile == null)
+            if (string.IsNullOrEmpty(currentFile))
+            {
+                Logger.Debug("Skipping heartbeat because current file is null or empty.");
                 return;
+            }
 
             var now = DateTime.UtcNow;
 
             if (!isWrite && _lastFile != null && !EnoughTimePassed(now) && currentFile.Equals(_lastFile))
+            {
+                Logger.Debug($"Skipping heartbeat because enough time has not passed since last heartbeat for file {currentFile}");
                 return;
+            }
 
             _lastFile = currentFile;
             _lastHeartbeat = now;

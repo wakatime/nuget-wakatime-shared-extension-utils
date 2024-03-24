@@ -9,7 +9,7 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public CliHeartbeat(WakaTime wakaTime) : base(wakaTime)
         {
-            this.AddFlagTime(DateTime.Now);
+            this.AddFlagTime(DateTime.UtcNow);
             this.AddFlagCategory(HeartbeatCategory.Coding);
             this.AddFlagEntityType(EntityType.File);
         }

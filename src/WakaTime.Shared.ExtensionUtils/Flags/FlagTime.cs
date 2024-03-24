@@ -10,6 +10,8 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #region Static Fields and Const
 
         private const string CliFlagName = "--time";
+        private const string JsonFlagName = "timestamp";
+
         private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         #endregion
@@ -25,7 +27,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </remarks>
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, value));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
             return flagHolder;
         }
 
@@ -37,7 +39,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, DateTime value)
         {
             string unixEpoch = ToUnixEpoch(value);
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, unixEpoch));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, unixEpoch));
             return flagHolder;
         }
 
@@ -58,6 +60,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         }
 
         private static long ToEpochSeconds(TimeSpan timestamp) => Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
+
         // ReSharper disable once StringLiteralTypo
         private static string ToEpochMilliseconds(TimeSpan timestamp) => timestamp.ToString("ffffff");
     }

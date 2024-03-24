@@ -11,6 +11,8 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #region Static Fields and Const
 
         private const string CliFlagName = "--key";
+        private const string JsonFlagName = "key";
+        
 
         #endregion
 
@@ -36,7 +38,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool obfuscate = true)
         {
             string cliFlagValue = obfuscate ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{value.Substring(value.Length - 4)}" : value;
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, cliFlagValue));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, cliFlagValue, false));
             return flagHolder;
         }
 

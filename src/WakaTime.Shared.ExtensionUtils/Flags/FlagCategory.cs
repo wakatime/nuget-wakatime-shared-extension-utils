@@ -6,8 +6,9 @@
     public static class FlagCategory
     {
         #region Static Fields and Const
-
+        
         private const string CliFlagName = "--category";
+        private const string JsonFlagName = "category";
 
         #endregion
 
@@ -34,7 +35,7 @@
         public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value)
         {
             string category = value.GetDescription();
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, category));
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName,category));
             return flagHolder;
         }
 

@@ -23,7 +23,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="value">Boolean value to set the flag to. True by default.</param>
         public static FlagHolder AddFlagWrite(this FlagHolder flagHolder, bool value = true)
         {
-            flagHolder.AddFlag(new Flag<bool>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter, false));
+            flagHolder.AddFlag(new Flag<bool>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter));
             return flagHolder;
         }
 
@@ -36,11 +36,15 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
-        
-        private static string FormatForJson(bool value) => $"\"{JsonFlagName}\": {JsonSerializerHelper.JsonEscape(value.ToString().ToLower())}";
+        private static Func<bool, bool, string> JsonFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": {JsonSerializerHelper.JsonEscape(formattedValue)}";
+        };
 
-        private static string FormatForCli(bool value) => !value ? string.Empty : $"{CliFlagName}";
+        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
 
-        private static Func<bool, string> ValueFormatter => value => value.ToString().ToLower();
+        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
+                                                                             .ToLower();
     }
 }

@@ -37,10 +37,9 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     <see cref="WakaTime.CommonFlagsHolder" /> only for this Heartbeat.
         /// </remarks>
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool obfuscate = true)
+        public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value)
         {
-            string flagValue = obfuscate ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{value.Substring(value.Length - 4)}" : value;
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(flagValue), FormatForJson(flagValue), flagValue, ValueFormatter, false));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter, true, false));
             return flagHolder;
         }
 
@@ -53,11 +52,20 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
-        
-        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
 
-        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
         
-        private static Func<string, string> ValueFormatter => value => value;
+        private static Func<string, bool, string> JsonFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
+        };
+
+        private static Func<string, bool, string> CliFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
+        };
+        
+        private static Func<string, bool, string> ValueFormatter => (v, b) => b ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{v.Substring(v.Length - 4)}" : v;
     }
 }

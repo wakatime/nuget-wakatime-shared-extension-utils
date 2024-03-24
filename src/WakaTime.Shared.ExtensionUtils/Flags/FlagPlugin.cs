@@ -33,7 +33,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </remarks>
         public static FlagHolder AddFlagPlugin(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter, false));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter, false, false));
             return flagHolder;
         }
 
@@ -47,10 +47,18 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             return flagHolder;
         }
         
-        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+        private static Func<string, bool, string> JsonFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
+        };
 
-        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
+        private static Func<string, bool, string> CliFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
+        };
         
-        private static Func<string, string> ValueFormatter => value => value;
+        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
     }
 }

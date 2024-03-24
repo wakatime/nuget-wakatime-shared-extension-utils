@@ -2,35 +2,46 @@
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
-    internal class Flag : IFlag
+    internal class Flag<T> : IFlag
     {
+        #region Fields
+
+        private readonly Func<T, bool, string> _cliFormatter;
+        private readonly Func<T, bool, string> _jsonFormatter;
+        private readonly T _value;
+        private readonly Func<T, bool, string> _valueFormatter;
+
+        #endregion
+
         #region Properties
 
         /// <inheritdoc />
-        public string FlagUniqueName { get; }
+        public string FlagUniqueName { get; set; }
 
         /// <inheritdoc />
-        public string ForJson { get; }
+        public bool ForExtraHeartbeat { get; set; }
 
         /// <inheritdoc />
-        public string ForCli { get; }
-
-        /// <inheritdoc />
-        public bool ForExtraHeartbeat { get; }
+        public bool CanObfuscate { get; set; }
 
         #endregion
 
         #region Constructors
 
-        internal Flag(string flagUniqueName, string forCli, string forJson, bool forExtraHeartbeat = true)
+        internal Flag(string flagUniqueName,
+                      T value,
+                      Func<T, bool, string> valueFormatter,
+                      Func<T, bool, string> cliFormatter,
+                      Func<T, bool, string> jsonFormatter,
+                      bool canObfuscate = false,
+                      bool forExtraHeartbeat = true)
         {
-            if (string.IsNullOrEmpty(flagUniqueName)) throw new ArgumentException("Flag unique name cannot be null or empty.", nameof(flagUniqueName));
-            if (string.IsNullOrEmpty(forCli)) throw new ArgumentException("For CLI argument cannot be null or empty.",         nameof(forCli));
-            if (string.IsNullOrEmpty(forJson)) throw new ArgumentException("For JSON argument cannot be null or empty.",       nameof(forJson));
-
+            _value = value;
+            _valueFormatter = valueFormatter;
+            _cliFormatter = cliFormatter;
+            _jsonFormatter = jsonFormatter;
             FlagUniqueName = flagUniqueName;
-            ForCli = forCli;
-            ForJson = forJson;
+            CanObfuscate = canObfuscate;
             ForExtraHeartbeat = forExtraHeartbeat;
         }
 
@@ -39,39 +50,13 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #region Interfaces Implement
 
         /// <inheritdoc />
-        public virtual string GetValue() => string.Empty;
-
-        #endregion
-    }
-
-    internal class Flag<T> : Flag
-    {
-        #region Fields
-
-        private readonly T _value;
-        private readonly Func<T, string> _valueFormatter;
-
-        #endregion
-
-        #region Constructors
-
-        internal Flag(string flagUniqueName,
-                      string forCli,
-                      string forJson,
-                      T value,
-                      Func<T, string> valueFormatter,
-                      bool forExtraHeartbeat = true) : base(flagUniqueName, forCli, forJson, forExtraHeartbeat)
-        {
-            _value = value;
-            _valueFormatter = valueFormatter;
-        }
-
-        #endregion
-
-        #region Overrides
+        public string GetValue(bool obfuscate) => _valueFormatter.Invoke(_value, CanObfuscate && obfuscate);
 
         /// <inheritdoc />
-        public override string GetValue() => _valueFormatter.Invoke(_value);
+        public string GetFormattedForCli(bool obfuscate = false) => _cliFormatter.Invoke(_value, CanObfuscate && obfuscate);
+
+        /// <inheritdoc />
+        public string GetFormattedForJson(bool obfuscate = false) => _jsonFormatter.Invoke(_value, CanObfuscate && obfuscate);
 
         #endregion
     }

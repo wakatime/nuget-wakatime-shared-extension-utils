@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using WakaTime.Shared.ExtensionUtils.Flags;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
@@ -15,6 +18,8 @@ namespace WakaTime.Shared.ExtensionUtils
         private readonly Dependencies _dependencies;
         private readonly Timer _heartbeatsProcessTimer;
         private readonly Timer _totalTimeTodayUpdateTimer;
+        
+        public FlagHolder CommonFlagsHolder { get; }
 
         private string _lastFile;
         private DateTime _lastHeartbeat;
@@ -48,20 +53,38 @@ namespace WakaTime.Shared.ExtensionUtils
                 throw new ArgumentNullException("logger");
 
             Logger = logger;
+            _metadata = metadata;
+            
             Config = new ConfigFile(Dependencies.GetConfigFilePath());
             HeartbeatQueue = new ConcurrentQueue<Heartbeat>();
-
-            _metadata = metadata;
+            CommonFlagsHolder = new FlagHolder(this);
+            
+            _dependencies = new Dependencies(logger, Config);
+            _heartbeatsProcessTimer = new Timer(10000);
+            _totalTimeTodayUpdateTimer = new Timer(60000);
+            _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
+            
             _cliParameters = new CliParameters
             {
                 Key = Config.GetSetting("api_key"),
                 Plugin =
                 $"{_metadata.EditorName}/{_metadata.EditorVersion} {_metadata.PluginName}/{_metadata.PluginVersion}"
             };
-            _dependencies = new Dependencies(logger, Config);
-            _heartbeatsProcessTimer = new Timer(10000);
-            _totalTimeTodayUpdateTimer = new Timer(60000);
-            _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
+
+            // add api key to cli flags
+            CommonFlagsHolder.AddFlagKey(Config.GetSetting("api_key"));
+            
+            // use string builder to safely append plugin name and version
+            var builder = new StringBuilder();
+            if(!string.IsNullOrEmpty(_metadata.EditorName) && !string.IsNullOrEmpty(_metadata.EditorVersion))
+                builder.Append($"{_metadata.EditorName}/{_metadata.EditorVersion}");
+            
+            if(!string.IsNullOrEmpty(_metadata.PluginName) && !string.IsNullOrEmpty(_metadata.PluginVersion))
+            {
+                if(builder.Length > 0) builder.Append(" ");
+                builder.Append($"{_metadata.PluginName}/{_metadata.PluginVersion}");
+            }
+            if(builder.Length > 0) CommonFlagsHolder.AddFlagPlugin(builder.ToString());
         }
 
         public async Task InitializeAsync()

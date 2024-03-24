@@ -2,9 +2,18 @@
 {
     public interface ICliFlag
     {
-        string Flag { get; }
-        
-        string ToString();
+        #region Properties
+
+        string FlagName { get; }
+
+        #endregion
+
+        #region Abstract Members
+
         string[] GetFlagWithValue();
+
+        string ToString();
+
+        #endregion
     }
 }

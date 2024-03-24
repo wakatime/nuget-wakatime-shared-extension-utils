@@ -1,119 +1,53 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
-    [SuppressMessage("ReSharper", "ConvertIfStatementToSwitchStatement")]
-    [SuppressMessage("ReSharper", "InvertIf")]
+    /// <summary>
+    ///     Extension methods for managing [--key] flag.
+    /// </summary>
     [SuppressMessage("ReSharper", "CommentTypo")]
     public static class FlagKey
     {
         #region Static Fields and Const
 
-        private const string KeyFlagName = "--key";
+        private const string CliFlagName = "--key";
 
         #endregion
 
         /// <summary>
-        ///     Adds [--key] flag to the CLI.
+        ///     Adds [--key] flag to the CLI arguments.
         /// </summary>
-        /// <param name="wakaTime">The WakaTime instance.</param>
+        /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Your wakatime api key; uses api_key from ~/.wakatime.cfg by default.</param>
         /// <param name="obfuscate">
         ///     Whether to obfuscate the value or not. If set to <c>true</c>, the value will be obfuscated with
         ///     'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX' + last 4 characters of the value. <br />
         ///     The default is <c>true</c>.
         /// </param>
-        /// <param name="addAlways">
-        ///     Whether the flag should be included in every heartbeat or just the next one. <br />
-        ///     The default is <c>true</c>.
-        /// </param>
+        /// <remarks>
+        ///     This flag is added by default to the <see cref="WakaTime.CommonFlagsHolder" /> instance on creation and will be
+        ///     added to each new <see cref="CliHeartbeat" />. <br />
+        ///     Specifying this flag in <see cref="WakaTime.CommonFlagsHolder" /> will override the value from the configuration
+        ///     file. <br />
+        ///     Specifying this flag in <see cref="CliHeartbeat" /> will override the value from the
+        ///     <see cref="WakaTime.CommonFlagsHolder" /> only for this Heartbeat.
+        /// </remarks>
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        public static void AddFlagKey(this WakaTime wakaTime, string value, bool obfuscate = true, bool addAlways = true)
+        public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool obfuscate = true)
         {
             string cliFlagValue = obfuscate ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{value.Substring(value.Length - 4)}" : value;
-
-            var flag = new CliFlag<string>(KeyFlagName, cliFlagValue);
-
-            var permanentFlag = wakaTime.CliFlagsPermanent.FirstOrDefault(f => f.Flag == KeyFlagName);
-            var temporaryFlag = wakaTime.CliFlagsTemporary.FirstOrDefault(f => f.Flag == KeyFlagName);
-
-            bool flagExistsInPermanent = permanentFlag != null;
-            bool flagExistsInTemporary = temporaryFlag != null;
-
-
-            if (addAlways && flagExistsInTemporary)
-            {
-                wakaTime.Logger.Debug($"Removing temporary flag {temporaryFlag}");
-                wakaTime.CliFlagsTemporary.Remove(temporaryFlag);
-            }
-
-            if (!addAlways && flagExistsInPermanent)
-            {
-                wakaTime.Logger.Debug($"Removing permanent flag {permanentFlag}");
-                wakaTime.CliFlagsPermanent.Remove(permanentFlag);
-            }
-
-            if (addAlways && !flagExistsInPermanent)
-            {
-                wakaTime.Logger.Debug($"Adding permanent flag {flag}");
-                wakaTime.CliFlagsPermanent.Add(flag);
-            }
-
-            if (!addAlways && !flagExistsInTemporary)
-            {
-                wakaTime.Logger.Debug($"Adding temporary flag {flag}");
-                wakaTime.CliFlagsTemporary.Add(flag);
-            }
+            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, cliFlagValue));
+            return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--key] flag from the CLI flags. <br />
+        ///     Removes the [--key] flag from the CLI arguments.
         /// </summary>
-        /// <param name="wakaTime">The WakaTime instance.</param>
-        /// <param name="removePermanent">
-        ///     Whether to remove the flag from the permanent flags or not. <br /> The permanent flags are those that are added to
-        ///     every heartbeat. <br />
-        ///     The default is <c>true</c>.
-        /// </param>
-        /// <param name="removeTemporary">
-        ///     Whether to remove the flag from the temporary flags or not. <br /> The temporary flags are those that are added to
-        ///     the next heartbeat only. <br />
-        ///     The default is <c>true</c>.
-        /// </param>
-        public static void RemoveFlagKey(this WakaTime wakaTime, bool removePermanent = true, bool removeTemporary = true)
+        /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
+        public static FlagHolder RemoveFlagKey(this FlagHolder flagHolder)
         {
-            if (!removePermanent && !removeTemporary)
-            {
-                wakaTime.Logger.Debug("No flags to remove");
-                return;
-            }
-
-            if (removePermanent)
-            {
-                var permanentFlag = wakaTime.CliFlagsPermanent.FirstOrDefault(f => f.Flag == KeyFlagName);
-                if (permanentFlag == null)
-                {
-                    wakaTime.Logger.Debug($"No permanent flag {KeyFlagName} to remove");
-                    return;
-                }
-
-                wakaTime.Logger.Debug($"Removing permanent flag {permanentFlag}");
-                wakaTime.CliFlagsPermanent.Remove(permanentFlag);
-            }
-
-            if (removeTemporary)
-            {
-                var temporaryFlag = wakaTime.CliFlagsTemporary.FirstOrDefault(f => f.Flag == KeyFlagName);
-                if (temporaryFlag == null)
-                {
-                    wakaTime.Logger.Debug($"No temporary flag {KeyFlagName} to remove");
-                    return;
-                }
-
-                wakaTime.Logger.Debug($"Removing temporary flag {temporaryFlag}");
-                wakaTime.CliFlagsTemporary.Remove(temporaryFlag);
-            }
+            flagHolder.RemoveFlag(CliFlagName);
+            return flagHolder;
         }
     }
 }

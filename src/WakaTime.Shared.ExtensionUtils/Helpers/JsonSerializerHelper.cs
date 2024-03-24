@@ -12,7 +12,7 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
         /// <param name="isExtraHeartbeat">Whether to include flags that are not for extra heartbeat.</param>
         /// <returns>JSON string representation of a heartbeat and its flags.</returns>
         // ReSharper disable once CognitiveComplexity
-        internal static string ToJson(IEnumerable<CliHeartbeat> heartbeats, bool isExtraHeartbeat = true)
+        internal static string ToJson(IEnumerable<FlagHolder> heartbeats, bool isExtraHeartbeat = true, bool obfuscate = false)
         {
             int heartbeatCount = 0;
             var b = new StringBuilder();
@@ -31,7 +31,7 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
                     if (!isExtraHeartbeat && !flag.Value.ForExtraHeartbeat) continue;
 
                     if (jsonMemberCount > 0) b.Append(",");
-                    string flagJsonValue = flag.Value.ForJson;
+                    string flagJsonValue = flag.Value.GetFormattedForJson(obfuscate);
                     
                     // skip flags that are empty
                     if(string.IsNullOrEmpty(flagJsonValue)) continue;

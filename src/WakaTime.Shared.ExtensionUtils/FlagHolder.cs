@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using WakaTime.Shared.ExtensionUtils.Flags;
-using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
@@ -45,14 +44,14 @@ namespace WakaTime.Shared.ExtensionUtils
                 _flags.Add(flag.FlagUniqueName, flag);
             }
         }
-        
+
         internal void AddFlags(IEnumerable<IFlag> flags, bool overwrite = true)
         {
             foreach (var flag in flags) AddFlag(flag, overwrite);
         }
 
         public void RemoveFlag(IFlag flag) => RemoveFlag(flag.FlagUniqueName);
-        
+
         internal void RemoveFlags(IEnumerable<IFlag> flags)
         {
             foreach (var flag in flags) RemoveFlag(flag);
@@ -70,7 +69,7 @@ namespace WakaTime.Shared.ExtensionUtils
             WakaTime.Logger.Debug($"Flag {flagUniqueName} exists. Removing.");
             _flags.Remove(flagUniqueName);
         }
-        
+
         internal void RemoveFlags(IEnumerable<string> flagUniqueNames)
         {
             foreach (string flagUniqueName in flagUniqueNames) RemoveFlag(flagUniqueName);
@@ -84,15 +83,23 @@ namespace WakaTime.Shared.ExtensionUtils
             bool hasCategory = HasFlag(FlagCategory.CliFlagName);
 
             if (!hasEntity) WakaTime.Logger.Error("Entity is required for sending heartbeat.");
-            if(!hasEntityType) WakaTime.Logger.Error("Entity type is required for sending heartbeat.");
-            if(!hasTime) WakaTime.Logger.Error("Time is required for sending heartbeat.");
-            if(!hasCategory) WakaTime.Logger.Error("Category is required for sending heartbeat.");
+            if (!hasEntityType) WakaTime.Logger.Error("Entity type is required for sending heartbeat.");
+            if (!hasTime) WakaTime.Logger.Error("Time is required for sending heartbeat.");
+            if (!hasCategory) WakaTime.Logger.Error("Category is required for sending heartbeat.");
 
             return hasEntity && hasEntityType && hasTime && hasCategory;
         }
 
         private bool HasFlag(string cliFlagName) => Flags.ContainsKey(cliFlagName);
 
-        
+        internal IFlag GetFlag(string flagUniqueName) => Flags.TryGetValue(flagUniqueName, out var flag) ? flag : null;
+
+        internal string FlagsToCliArgs() => string.Join(" ", Flags.Values);
+
+        internal string[] FlagsToCliArgsArray(bool obfuscate = false)
+        {
+            return Flags.Values.Select(flag => flag.GetFormattedForCli(obfuscate))
+                        .ToArray();
+        }
     }
 }

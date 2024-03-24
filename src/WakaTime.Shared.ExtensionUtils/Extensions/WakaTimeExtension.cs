@@ -23,7 +23,7 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
             return beat;
         }
 
-        public static WakaTime AddFlag(this WakaTime wakaTime, ICliFlag flag, bool overwrite = true)
+        public static WakaTime AddFlag(this WakaTime wakaTime, IFlag flag, bool overwrite = true)
         {
             wakaTime.CommonFlagsHolder.AddFlag(flag, overwrite);
             return wakaTime;

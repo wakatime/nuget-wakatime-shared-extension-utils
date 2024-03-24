@@ -1,14 +1,13 @@
-﻿namespace WakaTime.Shared.ExtensionUtils.Flags
+﻿using System;
+using System.Collections.Generic;
+using WakaTime.Shared.ExtensionUtils.Helpers;
+
+namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--extra-heartbeats] flag.
     /// </summary>
-    /// <remarks>
-    ///     The class is internal intentionally, as this flag is handled internally within
-    ///     <see cref="WakaTime.ProcessHeartbeats()" /> method of the <see cref="WakaTime" /> class
-    ///     and should not be exposed to the client.
-    /// </remarks>
-    internal static class FlagExtraHeartbeats
+    public static class FlagExtraHeartbeats
     {
         #region Static Fields and Const
 
@@ -22,9 +21,9 @@
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">A JSON string array of extra heartbeats to send.</param>
-        internal static FlagHolder AddFlagExtraHeartbeats(this FlagHolder flagHolder, string value)
+        public static FlagHolder AddFlagExtraHeartbeats(this FlagHolder flagHolder, CliHeartbeat[] value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value, false));
+            flagHolder.AddFlag(new Flag<CliHeartbeat[]>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter));
             return flagHolder;
         }
 
@@ -32,10 +31,18 @@
         ///     Removes the [--extra-heartbeats] flag from the CLI arguments.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
-        internal static FlagHolder RemoveFlagExtraHeartbeats(this FlagHolder flagHolder)
+        public static FlagHolder RemoveFlagExtraHeartbeats(this FlagHolder flagHolder)
         {
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        private static string ToJsonString(IEnumerable<CliHeartbeat> value) => JsonSerializerHelper.ToJson(value);
+        
+        private static string FormatForJson(IEnumerable<CliHeartbeat> value) => $"\"{JsonFlagName}\": {ToJsonString(value)}";
+
+        private static string FormatForCli(IEnumerable<CliHeartbeat> value) => $"{CliFlagName} {ToJsonString(value)}";
+        
+        private static Func<CliHeartbeat[], string> ValueFormatter => ToJsonString;
     }
 }

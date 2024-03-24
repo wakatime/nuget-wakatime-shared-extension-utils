@@ -1,4 +1,7 @@
-﻿namespace WakaTime.Shared.ExtensionUtils.Flags
+﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
+
+namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--category] flag.
@@ -6,9 +9,15 @@
     public static class FlagCategory
     {
         #region Static Fields and Const
-        
+
         private const string CliFlagName = "--category";
         private const string JsonFlagName = "category";
+
+        #endregion
+
+        #region Properties
+
+        private static Func<string, string> ValueFormatter => value => value;
 
         #endregion
 
@@ -32,10 +41,10 @@
         /// <seealso cref="HeartbeatCategory.CodeReviewing" />
         /// <seealso cref="HeartbeatCategory.Browsing" />
         /// <seealso cref="HeartbeatCategory.Designing" />
-        public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value)
+        public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value = HeartbeatCategory.Coding)
         {
             string category = value.GetDescription();
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName,category));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName,FormatForCli(category), FormatForJson(category), category, ValueFormatter));
             return flagHolder;
         }
 
@@ -48,5 +57,9 @@
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+
+        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
     }
 }

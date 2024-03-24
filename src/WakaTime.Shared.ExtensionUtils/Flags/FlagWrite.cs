@@ -1,4 +1,7 @@
-﻿namespace WakaTime.Shared.ExtensionUtils.Flags
+﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
+
+namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--write] flag.
@@ -20,7 +23,7 @@
         /// <param name="value">Boolean value to set the flag to. True by default.</param>
         public static FlagHolder AddFlagWrite(this FlagHolder flagHolder, bool value = true)
         {
-            flagHolder.AddFlag(new CliFlag<bool>(CliFlagName, JsonFlagName, value));
+            flagHolder.AddFlag(new Flag<bool>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter, false));
             return flagHolder;
         }
 
@@ -33,5 +36,11 @@
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+        
+        private static string FormatForJson(bool value) => $"\"{JsonFlagName}\": {JsonSerializerHelper.JsonEscape(value.ToString().ToLower())}";
+
+        private static string FormatForCli(bool value) => !value ? string.Empty : $"{CliFlagName}";
+
+        private static Func<bool, string> ValueFormatter => value => value.ToString().ToLower();
     }
 }

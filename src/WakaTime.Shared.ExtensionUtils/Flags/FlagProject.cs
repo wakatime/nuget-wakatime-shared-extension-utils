@@ -1,4 +1,7 @@
-﻿namespace WakaTime.Shared.ExtensionUtils.Flags
+﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
+
+namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     public static class FlagProject
     {
@@ -20,7 +23,7 @@
         /// <seealso cref="FlagProjectAlternate.AddFlagProjectAlternate" />
         public static FlagHolder AddFlagProject(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter));
             return flagHolder;
         }
 
@@ -34,5 +37,11 @@
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+        
+        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+
+        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
+        
+        private static Func<string, string> ValueFormatter => value => value;
     }
 }

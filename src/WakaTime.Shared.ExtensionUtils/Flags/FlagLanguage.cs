@@ -1,4 +1,7 @@
-﻿namespace WakaTime.Shared.ExtensionUtils.Flags
+﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
+
+namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--language] flag.
@@ -20,7 +23,7 @@
         /// <seealso cref="FlagLanguageAlternate.AddFlagLanguageAlternate" />
         public static FlagHolder AddFlagLanguage(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter));
             return flagHolder;
         }
 
@@ -34,5 +37,11 @@
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+        
+        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+
+        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
+        
+        private static Func<string, string> ValueFormatter => value => value;
     }
 }

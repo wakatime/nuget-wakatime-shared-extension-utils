@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using WakaTime.Shared.ExtensionUtils.Flags;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
@@ -8,14 +9,14 @@ namespace WakaTime.Shared.ExtensionUtils
     {
         #region Fields
 
-        private readonly Dictionary<string, ICliFlag> _flags = new Dictionary<string, ICliFlag>();
+        private readonly Dictionary<string, IFlag> _flags = new Dictionary<string, IFlag>();
         internal readonly WakaTime WakaTime;
 
         #endregion
 
         #region Properties
 
-        public IReadOnlyDictionary<string, ICliFlag> Flags => _flags;
+        public IReadOnlyDictionary<string, IFlag> Flags => _flags;
 
         #endregion
 
@@ -25,125 +26,43 @@ namespace WakaTime.Shared.ExtensionUtils
 
         #endregion
 
-        public void AddFlag(ICliFlag flag, bool overwrite = true)
+        public void AddFlag(IFlag flag, bool overwrite = true)
         {
-            if (_flags.ContainsKey(flag.CliFlagName))
+            if (_flags.ContainsKey(flag.FlagUniqueName))
             {
                 if (!overwrite)
                 {
-                    WakaTime.Logger.Debug($"Flag {flag.CliFlagName} already exists. But the {nameof(overwrite)} flag is set to false. Cannot overwrite.");
+                    WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} already exists. But the {nameof(overwrite)} flag is set to false. Cannot overwrite.");
                     return;
                 }
 
-                WakaTime.Logger.Debug($"Flag {flag.CliFlagName} already exists. Overwriting.");
-                _flags[flag.CliFlagName] = flag;
+                WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} already exists. Overwriting.");
+                _flags[flag.FlagUniqueName] = flag;
             }
             else
             {
-                WakaTime.Logger.Debug($"Flag {flag.CliFlagName} does not exist. Adding.");
-                _flags.Add(flag.CliFlagName, flag);
+                WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} does not exist. Adding.");
+                _flags.Add(flag.FlagUniqueName, flag);
             }
         }
 
-        public void RemoveFlag(ICliFlag flag) => RemoveFlag(flag.CliFlagName);
+        public void RemoveFlag(IFlag flag) => RemoveFlag(flag.FlagUniqueName);
 
-        public void RemoveFlag(string flag)
+        public void RemoveFlag(string flagUniqueName)
         {
-            bool flagExists = _flags.TryGetValue(flag, out var existingFlag);
+            bool flagExists = _flags.TryGetValue(flagUniqueName, out var existingFlag);
             if (!flagExists)
             {
-                WakaTime.Logger.Debug($"Flag {flag} does not exist. Cannot remove.");
+                WakaTime.Logger.Debug($"Flag {flagUniqueName} does not exist. Cannot remove.");
                 return;
             }
 
-            WakaTime.Logger.Debug($"Flag {flag} exists. Removing.");
-            _flags.Remove(flag);
+            WakaTime.Logger.Debug($"Flag {flagUniqueName} exists. Removing.");
+            _flags.Remove(flagUniqueName);
         }
 
-        /// <summary>
-        ///     Converts the heartbeat flags to JSON.
-        /// </summary>
-        /// <param name="isExtraHeartbeat">Whether to include flags that are not for extra heartbeat.</param>
-        /// <returns>JSON string representation of a heartbeat and its flags.</returns>
-        public string ToJson(bool isExtraHeartbeat = true)
-        {
-            int memberCount = 0;
-            var b = new StringBuilder();
-            b.Append("{");
 
-            foreach (var flag in _flags)
-            {
-                // skip flags that are not for extra heartbeat
-                if (!isExtraHeartbeat && !flag.Value.ForExtraHeartbeat) continue;
 
-                if (memberCount > 0) b.Append(",");
-                b.Append($"\"{flag.Value.JsonFlagName}\":\"{JsonEscape(flag.Value.GetValue())}\"");
-                memberCount++;
-            }
-
-            return b.Append("}")
-                    .ToString();
-        }
-
-        /// <summary>
-        ///     Escapes the string to be used in JSON.
-        /// </summary>
-        /// <param name="value">The string to escape.</param>
-        /// <returns>Escaped string.</returns>
-        // ReSharper disable once CognitiveComplexity
-        private static string JsonEscape(string value)
-        {
-            if (value == null) return null;
-            var escaped = new StringBuilder();
-            char[] chars = value.ToCharArray();
-            foreach (char c in chars)
-            {
-                switch (c)
-                {
-                    case '\\':
-                        escaped.Append("\\\\");
-                        break;
-                    case '\"':
-                        escaped.Append("\\\"");
-                        break;
-                    case '\b':
-                        escaped.Append("\\b");
-                        break;
-                    case '\f':
-                        escaped.Append("\\f");
-                        break;
-                    case '\n':
-                        escaped.Append("\\n");
-                        break;
-                    case '\r':
-                        escaped.Append("\\r");
-                        break;
-                    case '\t':
-                        escaped.Append("\\t");
-                        break;
-                    default:
-                        bool isUnicode = c <= '\u001F' || (c >= '\u007F' && c <= '\u009F') || (c >= '\u2000' && c <= '\u20FF');
-                        if (isUnicode)
-                        {
-                            escaped.Append("\\u");
-                            string hex = ((int)c).ToString("X");
-                            for (int k = 0; k < 4 - hex.Length; k++)
-                            {
-                                escaped.Append('0');
-                            }
-
-                            escaped.Append(hex.ToUpper());
-                        }
-                        else
-                        {
-                            escaped.Append(c);
-                        }
-
-                        break;
-                }
-            }
-
-            return escaped.ToString();
-        }
+        
     }
 }

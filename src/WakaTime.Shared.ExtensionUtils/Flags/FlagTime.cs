@@ -1,4 +1,5 @@
 ﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
@@ -27,7 +28,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </remarks>
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, string value)
         {
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, value));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(value), FormatForJson(value), value, ValueFormatter));
             return flagHolder;
         }
 
@@ -39,7 +40,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, DateTime value)
         {
             string unixEpoch = ToUnixEpoch(value);
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, unixEpoch));
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(unixEpoch), FormatForJson(unixEpoch), unixEpoch, ValueFormatter));
             return flagHolder;
         }
 
@@ -52,6 +53,12 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+        
+        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+
+        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
+        
+        private static Func<string, string> ValueFormatter => value => value;
 
         private static string ToUnixEpoch(DateTime date)
         {

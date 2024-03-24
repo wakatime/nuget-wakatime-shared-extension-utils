@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
@@ -37,8 +39,8 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
         public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool obfuscate = true)
         {
-            string cliFlagValue = obfuscate ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{value.Substring(value.Length - 4)}" : value;
-            flagHolder.AddFlag(new CliFlag<string>(CliFlagName, JsonFlagName, cliFlagValue, false));
+            string flagValue = obfuscate ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{value.Substring(value.Length - 4)}" : value;
+            flagHolder.AddFlag(new Flag<string>(CliFlagName, FormatForCli(flagValue), FormatForJson(flagValue), flagValue, ValueFormatter, false));
             return flagHolder;
         }
 
@@ -51,5 +53,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+        
+        private static string FormatForJson(string value) => $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(value)}\"";
+
+        private static string FormatForCli(string value) => $"{CliFlagName} {value}";
+        
+        private static Func<string, string> ValueFormatter => value => value;
     }
 }

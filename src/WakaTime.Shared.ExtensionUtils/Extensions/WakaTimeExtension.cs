@@ -14,11 +14,16 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
                                                    HeartbeatCategory? category = null, EntityType? entityType = null)
         {
             var beat = new CliHeartbeat(wakaTime);
+            var commonFlags = wakaTime.CommonFlagsHolder.Flags;
+            beat.AddFlags(commonFlags.Values);
+            
             beat.AddFlagEntity(currentFile);
             beat.AddFlagWrite(isWrite);
             beat.AddFlagProjectAlternate(project);
             if(category.HasValue) beat.AddFlagCategory(category.Value);
             if(entityType.HasValue) beat.AddFlagEntityType(entityType.Value);
+            
+            
             
             return beat;
         }

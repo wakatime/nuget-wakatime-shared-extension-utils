@@ -11,7 +11,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        private const string CliFlagName = "--extra-heartbeats";
+        internal const string CliFlagName = "--extra-heartbeats";
         private const string JsonFlagName = "extra_heartbeats";
 
         #endregion

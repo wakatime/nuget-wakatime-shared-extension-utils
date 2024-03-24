@@ -10,7 +10,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        private const string CliFlagName = "--write";
+        internal const string CliFlagName = "--write";
         private const string JsonFlagName = "is_write";
 
         #endregion

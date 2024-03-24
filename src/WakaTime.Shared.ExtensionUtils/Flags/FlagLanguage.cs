@@ -10,7 +10,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        private const string CliFlagName = "--language";
+        internal const string CliFlagName = "--language";
         private const string JsonFlagName = "language";
 
         #endregion

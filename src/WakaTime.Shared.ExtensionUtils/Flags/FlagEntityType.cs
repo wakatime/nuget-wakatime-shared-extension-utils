@@ -10,7 +10,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
         
-        private const string CliFlagName = "--entity-type";
+        internal const string CliFlagName = "--entity-type";
         private const string JsonFlagName = "entity_type";
 
         #endregion

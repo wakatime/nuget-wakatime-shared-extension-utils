@@ -4,10 +4,13 @@ using WakaTime.Shared.ExtensionUtils.Flags;
 
 namespace WakaTime.Shared.ExtensionUtils
 {
+    /// <summary>
+    ///     Represents an object holding flags with values for the CLI arguments.
+    /// </summary>
     public class FlagHolder
     {
         #region Fields
-
+        
         private readonly Dictionary<string, IFlag> _flags = new Dictionary<string, IFlag>();
         internal readonly WakaTime WakaTime;
 

@@ -29,12 +29,12 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The default is <c>true</c>.
         /// </param>
         /// <remarks>
-        ///     This flag is added by default to the <see cref="WakaTime.CommonFlagsHolder" /> instance on creation and will be
-        ///     added to each new <see cref="CliHeartbeat" />. <br />
-        ///     Specifying this flag in <see cref="WakaTime.CommonFlagsHolder" /> will override the value from the configuration
+        ///     This flag is added by default to the <see cref="WakaTime.CommonFlags" /> instance on creation and will be
+        ///     added to each new <see cref="FlagHolder" />. <br />
+        ///     Specifying this flag in <see cref="WakaTime.CommonFlags" /> will override the value from the configuration
         ///     file. <br />
-        ///     Specifying this flag in <see cref="CliHeartbeat" /> will override the value from the
-        ///     <see cref="WakaTime.CommonFlagsHolder" /> only for this Heartbeat.
+        ///     Specifying this flag in <see cref="FlagHolder" /> will override the value from the
+        ///     <see cref="WakaTime.CommonFlags" /> only for this Heartbeat.
         /// </remarks>
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
         public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value)

@@ -1,37 +1,37 @@
-﻿using WakaTime.Shared.ExtensionUtils.Flags;
+﻿using System;
+using WakaTime.Shared.ExtensionUtils.Flags;
 
 namespace WakaTime.Shared.ExtensionUtils.Extensions
 {
     public static class WakaTimeExtension
     {
-        public static CliHeartbeat CreateHeartbeat(this WakaTime wakaTime)
+        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime)
         {
-            var beat = new CliHeartbeat(wakaTime);
+            var beat = new FlagHolder(wakaTime);
+            var commonFlags = wakaTime.CommonFlags.Flags;
+            beat.AddFlags(commonFlags.Values);
+            
+            beat.AddFlagCategory();
+            beat.AddFlagEntityType();
+            beat.AddFlagTime(DateTime.UtcNow);
+            
             return beat;
         }
         
-        public static CliHeartbeat CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite, string project,
-                                                   HeartbeatCategory? category = null, EntityType? entityType = null)
+        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite, string project,
+                                                 HeartbeatCategory? category = null, EntityType? entityType = null)
         {
-            var beat = new CliHeartbeat(wakaTime);
-            var commonFlags = wakaTime.CommonFlagsHolder.Flags;
-            beat.AddFlags(commonFlags.Values);
+            var beat = CreateHeartbeat(wakaTime);
             
+            if (category.HasValue) beat.AddFlagCategory(category.Value);
             beat.AddFlagEntity(currentFile);
-            beat.AddFlagWrite(isWrite);
-            beat.AddFlagProjectAlternate(project);
-            if(category.HasValue) beat.AddFlagCategory(category.Value);
+            
             if(entityType.HasValue) beat.AddFlagEntityType(entityType.Value);
-            
-            
+                
+            beat.AddFlagProjectAlternate(project);
+            beat.AddFlagWrite(isWrite);
             
             return beat;
-        }
-
-        public static WakaTime AddFlag(this WakaTime wakaTime, IFlag flag, bool overwrite = true)
-        {
-            wakaTime.CommonFlagsHolder.AddFlag(flag, overwrite);
-            return wakaTime;
         }
     }
 }

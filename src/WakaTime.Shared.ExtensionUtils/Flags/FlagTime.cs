@@ -23,7 +23,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Floating-point unix epoch timestamp. Uses current time by default.</param>
         /// <remarks>
-        ///     The flag is added by default to every new instance of <see cref="CliHeartbeat" />. <br />
+        ///     The flag is added by default to every new instance of <see cref="FlagHolder" />. <br />
         ///     Adding this flag again will override the value set at the time of creation.
         /// </remarks>
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, string value)

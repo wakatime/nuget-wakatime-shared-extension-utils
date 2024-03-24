@@ -1,15 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using WakaTime.Shared.ExtensionUtils;
 
 public static class JSONSerializer
 {
     /// <summary>
-    /// Serializes an object to JSON
+    ///     Serializes an object to JSON
     /// </summary>
-    public static string Serialize<TType>(TType instance) where TType : class
+    public static string Serialize<TType>(TType instance)
+        where TType : class
     {
         var serializer = new DataContractJsonSerializer(typeof(TType));
         using (var stream = new MemoryStream())
@@ -20,18 +19,10 @@ public static class JSONSerializer
     }
 
     /// <summary>
-    /// Serializes a collection of Heartbeat to JSON
+    ///     DeSerializes an object from JSON
     /// </summary>
-    public static string SerializeArrayHeartbeat(Collection<Heartbeat> instance)
-    {
-        var heartbeats = string.Join(",", instance);
-        return $"[{heartbeats}]";
-    }
-
-    /// <summary>
-    /// DeSerializes an object from JSON
-    /// </summary>
-    public static TType DeSerialize<TType>(string json) where TType : class
+    public static TType DeSerialize<TType>(string json)
+        where TType : class
     {
         using (var stream = new MemoryStream(Encoding.Default.GetBytes(json)))
         {

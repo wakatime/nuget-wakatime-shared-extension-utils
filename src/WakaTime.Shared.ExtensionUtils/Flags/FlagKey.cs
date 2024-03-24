@@ -12,9 +12,43 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
+        /// <summary>
+        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
+        ///     <value>--key</value>
+        /// </summary>
         internal const string CliFlagName = "--key";
+
+        /// <summary>
+        ///     The key name for JSON serialization.
+        /// </summary>
         private const string JsonFlagName = "key";
-        
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     Formats the value for JSON serialization.
+        /// </summary>
+        private static Func<string, bool, string> JsonFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
+        };
+
+        /// <summary>
+        ///     Formats the value for CLI arguments.
+        /// </summary>
+        private static Func<string, bool, string> CliFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
+        };
+
+        /// <summary>
+        ///     Formats the value for the string representation.
+        /// </summary>
+        private static Func<string, bool, string> ValueFormatter => (v, b) => b ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{v.Substring(v.Length - 4)}" : v;
 
         #endregion
 
@@ -23,11 +57,6 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Your wakatime api key; uses api_key from ~/.wakatime.cfg by default.</param>
-        /// <param name="obfuscate">
-        ///     Whether to obfuscate the value or not. If set to <c>true</c>, the value will be obfuscated with
-        ///     'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX' + last 4 characters of the value. <br />
-        ///     The default is <c>true</c>.
-        /// </param>
         /// <remarks>
         ///     This flag is added by default to the <see cref="WakaTime.CommonFlags" /> instance on creation and will be
         ///     added to each new <see cref="FlagHolder" />. <br />
@@ -52,20 +81,5 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
-
-        
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
-
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
-        };
-        
-        private static Func<string, bool, string> ValueFormatter => (v, b) => b ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{v.Substring(v.Length - 4)}" : v;
     }
 }

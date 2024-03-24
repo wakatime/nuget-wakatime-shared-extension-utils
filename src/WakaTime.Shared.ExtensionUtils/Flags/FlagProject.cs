@@ -3,12 +3,50 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
+    /// <summary>
+    ///     Extension methods for managing [--project] flag.
+    /// </summary>
     public static class FlagProject
     {
         #region Static Fields and Const
 
+        /// <summary>
+        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
+        ///     <value>--project</value>
+        /// </summary>
         internal const string CliFlagName = "--project";
+
+        /// <summary>
+        ///     The key name for JSON serialization.
+        /// </summary>
         private const string JsonFlagName = "project";
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     Formats the value for the string representation.
+        /// </summary>
+        private static Func<string, bool, string> JsonFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
+        };
+
+        /// <summary>
+        ///     Formats the value for CLI arguments.
+        /// </summary>
+        private static Func<string, bool, string> CliFormatter => (v, b) =>
+        {
+            string formattedValue = ValueFormatter.Invoke(v, b);
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
+        };
+
+        /// <summary>
+        ///     Formats the value for the string representation.
+        /// </summary>
+        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
 
         #endregion
 
@@ -37,19 +75,5 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
-        
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
-
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
-        };
-        
-        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
     }
 }

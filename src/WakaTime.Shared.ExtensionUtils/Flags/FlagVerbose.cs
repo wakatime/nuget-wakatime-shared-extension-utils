@@ -1,5 +1,4 @@
 ﻿using System;
-using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
@@ -10,8 +9,39 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
+        /// <summary>
+        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
+        ///     <value>--verbose</value>
+        /// </summary>
         internal const string CliFlagName = "--verbose";
+
+        /// <summary>
+        ///     The key name for JSON serialization.
+        /// </summary>
         private const string JsonFlagName = "verbose";
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     Formats the value for the string representation.
+        /// </summary>
+        /// <remarks>
+        ///     Always returns empty string as the verbose flag should not be serialized to JSON.
+        /// </remarks>
+        private static Func<bool, bool, string> JsonFormatter => (v, b) => string.Empty;
+
+        /// <summary>
+        ///     Formats the value for CLI arguments.
+        /// </summary>
+        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
+
+        /// <summary>
+        ///     Formats the value for the string representation.
+        /// </summary>
+        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
+                                                                             .ToLower();
 
         #endregion
 
@@ -36,16 +66,5 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
-        
-        private static Func<bool, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": {JsonSerializerHelper.JsonEscape(formattedValue)}";
-        };
-
-        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
-
-        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
-                                                                             .ToLower();
     }
 }

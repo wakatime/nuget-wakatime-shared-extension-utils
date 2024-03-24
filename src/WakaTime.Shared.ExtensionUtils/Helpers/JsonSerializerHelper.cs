@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using WakaTime.Shared.ExtensionUtils.Flags;
 
 namespace WakaTime.Shared.ExtensionUtils.Helpers
 {
@@ -10,6 +11,10 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
         /// </summary>
         /// <param name="heartbeats">The list of heartbeats to serialize.</param>
         /// <param name="isExtraHeartbeat">Whether to include flags that are not for extra heartbeat.</param>
+        /// <param name="obfuscate">
+        ///     Whether to obfuscate the values. If set to <c>true</c> only flags that have the
+        ///     <see cref="IFlag.CanObfuscate" /> of the <see cref="IFlag" /> will be obfuscated.
+        /// </param>
         /// <returns>JSON string representation of a heartbeat and its flags.</returns>
         // ReSharper disable once CognitiveComplexity
         internal static string ToJson(IEnumerable<FlagHolder> heartbeats, bool isExtraHeartbeat = true, bool obfuscate = false)
@@ -21,10 +26,10 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
             foreach (var hb in heartbeats)
             {
                 if (heartbeatCount > 0) b.Append(",");
-                
+
                 int jsonMemberCount = 0;
                 b.Append("{");
-                
+
                 foreach (var flag in hb.Flags)
                 {
                     // skip flags that are not for extra heartbeat
@@ -32,14 +37,14 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
 
                     if (jsonMemberCount > 0) b.Append(",");
                     string flagJsonValue = flag.Value.GetFormattedForJson(obfuscate);
-                    
+
                     // skip flags that are empty
-                    if(string.IsNullOrEmpty(flagJsonValue)) continue;
-                    
+                    if (string.IsNullOrEmpty(flagJsonValue)) continue;
+
                     b.Append(flagJsonValue);
                     jsonMemberCount++;
                 }
-                
+
                 b.Append("}");
                 heartbeatCount++;
             }
@@ -47,7 +52,7 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
             return b.Append("]")
                     .ToString();
         }
-        
+
         /// <summary>
         ///     Escapes the string to be used in JSON.
         /// </summary>

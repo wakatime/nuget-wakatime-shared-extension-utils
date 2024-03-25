@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,14 +54,8 @@ namespace WakaTime.Shared.ExtensionUtils
 
         public WakaTime(Metadata metadata, ILogger logger)
         {
-            if (metadata is null)
-                throw new ArgumentNullException("metadata");
-
-            if (logger is null)
-                throw new ArgumentNullException("logger");
-
-            Logger = logger;
-            _metadata = metadata;
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
             Config = new ConfigFile(Dependencies.GetConfigFilePath());
             _heartbeatQueue = new ConcurrentQueue<FlagHolder>();
@@ -279,6 +274,14 @@ namespace WakaTime.Shared.ExtensionUtils
 
                 string binary = _dependencies.GetCliLocation();
                 var process = new RunProcess(binary, heartbeat.FlagsToCliArgsArray());
+                
+                var args = heartbeat.FlagsToCliArgsArray();
+                var x = args
+                   .Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
+                   .TrimEnd(' ');
+                
+                Logger.Debug($"BINARY: {binary}");
+                Logger.Debug($"FLAGS: {x}");
 
                 Logger.Debug($"[\"{binary}\", \"{string.Join("\", \"", heartbeat.FlagsToCliArgsArray(true))}\"]");
 

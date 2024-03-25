@@ -16,7 +16,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--key</value>
         /// </summary>
-        internal const string CliFlagName = "--key";
+        public const string CliFlagName = "--key";
 
         /// <summary>
         ///     The key name for JSON serialization.

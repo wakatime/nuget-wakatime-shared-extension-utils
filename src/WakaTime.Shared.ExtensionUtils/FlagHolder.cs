@@ -189,7 +189,7 @@ namespace WakaTime.Shared.ExtensionUtils
         /// </summary>
         /// <param name="flagUniqueName">The unique name of the flag to get.</param>
         /// <returns>The flag if it exists; otherwise, <c>null</c>.</returns>
-        internal IFlag GetFlag(string flagUniqueName) => Flags.TryGetValue(flagUniqueName, out var flag) ? flag : null;
+        public IFlag GetFlag(string flagUniqueName) => Flags.TryGetValue(flagUniqueName, out var flag) ? flag : null;
 
         /// <summary>
         ///     Converts the flags to CLI arguments array.
@@ -202,6 +202,7 @@ namespace WakaTime.Shared.ExtensionUtils
         internal string[] FlagsToCliArgsArray(bool obfuscate = false)
         {
             return Flags.Values.Select(flag => flag.GetFormattedForCli(obfuscate))
+                        .Where(cli => !string.IsNullOrWhiteSpace(cli))
                         .ToArray();
         }
     }

@@ -4,7 +4,9 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--plugin] flag.
+    ///     Extension methods for managing [--plugin] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagPlugin" /> <br />
+    ///     Remove: <see cref="RemoveFlagPlugin" /> <br />
     /// </summary>
     public static class FlagPlugin
     {
@@ -14,7 +16,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--plugin</value>
         /// </summary>
-        internal const string CliFlagName = "--plugin";
+        public const string CliFlagName = "--plugin";
 
         /// <summary>
         ///     The key name for JSON serialization.

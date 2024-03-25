@@ -1,10 +1,11 @@
 ﻿using System;
-using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--extra-heartbeats] flag.
+    ///     Extension methods for managing [--extra-heartbeats] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagExtraHeartbeats" /> <br />
+    ///     Remove: <see cref="RemoveFlagExtraHeartbeats" /> <br />
     /// </summary>
     /// <remarks>
     ///     The class and methods are intentionally made internal and should not be exposed to the client. <br />

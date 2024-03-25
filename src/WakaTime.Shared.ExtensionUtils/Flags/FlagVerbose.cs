@@ -3,7 +3,9 @@
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--verbose] flag.
+    ///     Extension methods for managing [--verbose] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagVerbose" /> <br />
+    ///     Remove: <see cref="RemoveFlagVerbose" /> <br />
     /// </summary>
     public static class FlagVerbose
     {

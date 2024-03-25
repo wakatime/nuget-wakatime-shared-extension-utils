@@ -4,7 +4,10 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--time] flag.
+    ///     Extension methods for managing [--time] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagTime(FlagHolder,string)" /> <br />
+    ///     or Add: <see cref="AddFlagTime(FlagHolder,DateTime)" /> <br />
+    ///     Remove: <see cref="RemoveFlagTime" /> <br />
     /// </summary>
     public static class FlagTime
     {
@@ -14,7 +17,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--time</value>
         /// </summary>
-        internal const string CliFlagName = "--time";
+        public const string CliFlagName = "--time";
 
         /// <summary>
         ///     The key name for JSON serialization.

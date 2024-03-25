@@ -5,7 +5,9 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--key] flag.
+    ///     Extension methods for managing [--key] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagKey" /> <br />
+    ///     Remove: <see cref="RemoveFlagKey" /> <br />
     /// </summary>
     [SuppressMessage("ReSharper", "CommentTypo")]
     public static class FlagKey

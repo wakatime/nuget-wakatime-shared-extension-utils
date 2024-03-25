@@ -4,8 +4,11 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--category] flag.
+    ///     Extension methods for managing [--category] flag. <br /> <br />
+    /// Add: <see cref="AddFlagCategory"/> <br />
+    /// Remove: <see cref="RemoveFlagCategory"/> <br />
     /// </summary>
+    ///  <seealso cref="HeartbeatCategory"/>
     public static class FlagCategory
     {
         #region Static Fields and Const
@@ -14,7 +17,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--category</value>
         /// </summary>
-        internal const string CliFlagName = "--category";
+        public const string CliFlagName = "--category";
 
         /// <summary>
         ///     The key name for JSON serialization.

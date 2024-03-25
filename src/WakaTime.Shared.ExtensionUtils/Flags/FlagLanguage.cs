@@ -4,7 +4,9 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--language] flag.
+    ///     Extension methods for managing [--language] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagLanguage" /> <br />
+    ///     Remove: <see cref="RemoveFlagLanguage" /> <br />
     /// </summary>
     public static class FlagLanguage
     {

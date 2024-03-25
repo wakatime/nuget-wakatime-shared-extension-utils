@@ -3,7 +3,9 @@
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--write] flag.
+    ///     Extension methods for managing [--write] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagWrite" /> <br />
+    ///     Remove: <see cref="RemoveFlagWrite" /> <br />
     /// </summary>
     public static class FlagWrite
     {
@@ -13,7 +15,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--write</value>
         /// </summary>
-        internal const string CliFlagName = "--write";
+        public const string CliFlagName = "--write";
 
         /// <summary>
         ///     The key name for JSON serialization.

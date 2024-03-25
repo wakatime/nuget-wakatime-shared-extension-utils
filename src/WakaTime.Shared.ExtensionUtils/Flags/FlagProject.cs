@@ -4,7 +4,9 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--project] flag.
+    ///     Extension methods for managing [--project] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagProject" /> <br />
+    ///     Remove: <see cref="RemoveFlagProject" /> <br />
     /// </summary>
     public static class FlagProject
     {
@@ -14,7 +16,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--project</value>
         /// </summary>
-        internal const string CliFlagName = "--project";
+        public const string CliFlagName = "--project";
 
         /// <summary>
         ///     The key name for JSON serialization.

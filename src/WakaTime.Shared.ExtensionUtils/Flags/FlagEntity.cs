@@ -4,7 +4,9 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--entity] flag.
+    ///     Extension methods for managing [--entity] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagEntity" /> <br />
+    ///     Remove: <see cref="RemoveFlagEntity" /> <br />
     /// </summary>
     public static class FlagEntity
     {
@@ -14,7 +16,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--entity</value>
         /// </summary>
-        internal const string CliFlagName = "--entity";
+        public const string CliFlagName = "--entity";
 
         /// <summary>
         ///     The key name for JSON serialization.

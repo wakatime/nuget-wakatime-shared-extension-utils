@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using WakaTime.Shared.ExtensionUtils.Exceptions;
 using WakaTime.Shared.ExtensionUtils.Extensions;
 using WakaTime.Shared.ExtensionUtils.Flags;
 using WakaTime.Shared.ExtensionUtils.Helpers;
@@ -32,7 +34,14 @@ namespace WakaTime.Shared.ExtensionUtils
         #region Properties
 
         /// <summary>
-        ///     Flags within this holder will be added to every heartbeat.
+        ///     Heartbeats waiting to be sent.
+        /// </summary>
+        public IReadOnlyCollection<FlagHolder> HeartbeatQueue => _heartbeatQueue;
+
+        /// <summary>
+        ///     Flags within this holder will be added to every heartbeat created with
+        ///     <see cref="HandleActivity(string, bool, string, HeartbeatCategory?, EntityType?)" />
+        ///     or with <see cref="WakaTimeExtension.CreateHeartbeat(WakaTime)" />.
         /// </summary>
         public FlagHolder CommonFlags { get; }
 
@@ -67,28 +76,6 @@ namespace WakaTime.Shared.ExtensionUtils
             _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
 
             InitializeCommonFlags();
-        }
-
-        /// <summary>
-        ///     Adds common flags for all Heartbeats to the <see cref="CommonFlags" /> holder.
-        /// </summary>
-        private void InitializeCommonFlags()
-        {
-            // add api key to cli flags
-            CommonFlags.AddFlagKey(Config.GetSetting("api_key"));
-
-            // use string builder to safely append plugin name and version
-            var builder = new StringBuilder();
-            if (!string.IsNullOrEmpty(_metadata.EditorName) && !string.IsNullOrEmpty(_metadata.EditorVersion))
-                builder.Append($"{_metadata.EditorName}/{_metadata.EditorVersion}");
-
-            if (!string.IsNullOrEmpty(_metadata.PluginName) && !string.IsNullOrEmpty(_metadata.PluginVersion))
-            {
-                if (builder.Length > 0) builder.Append(" ");
-                builder.Append($"{_metadata.PluginName}/{_metadata.PluginVersion}");
-            }
-
-            if (builder.Length > 0) CommonFlags.AddFlagPlugin(builder.ToString());
         }
 
         #endregion
@@ -144,6 +131,29 @@ namespace WakaTime.Shared.ExtensionUtils
 
         #endregion
 
+        /// <summary>
+        ///     Adds common flags for all Heartbeats to the <see cref="CommonFlags" /> holder.
+        ///     Adds <see cref="FlagKey" /> and <see cref="FlagPlugin" />.
+        /// </summary>
+        private void InitializeCommonFlags()
+        {
+            // add api key to cli flags
+            CommonFlags.AddFlagKey(Config.GetSetting("api_key"));
+
+            // use string builder to safely append plugin name and version
+            var builder = new StringBuilder();
+            if (!string.IsNullOrEmpty(_metadata.EditorName) && !string.IsNullOrEmpty(_metadata.EditorVersion))
+                builder.Append($"{_metadata.EditorName}/{_metadata.EditorVersion}");
+
+            if (!string.IsNullOrEmpty(_metadata.PluginName) && !string.IsNullOrEmpty(_metadata.PluginVersion))
+            {
+                if (builder.Length > 0) builder.Append(" ");
+                builder.Append($"{_metadata.PluginName}/{_metadata.PluginVersion}");
+            }
+
+            if (builder.Length > 0) CommonFlags.AddFlagPlugin(builder.ToString());
+        }
+
         public async Task InitializeAsync()
         {
             Logger.Info($"Initializing WakaTime v{_metadata.PluginVersion}");
@@ -177,24 +187,26 @@ namespace WakaTime.Shared.ExtensionUtils
         /// <param name="currentFile">CLI Arg: [--entity] = The current file being edited. </param>
         /// <param name="isWrite">CLI Arg: [--write] = Whether the file is being written to or not.</param>
         /// <param name="project">CLI Arg: [--alternate-project] = The project name. </param>
-        /// <param name="category">CLI Arg: [--category] = The category of the file being edited. <br />
-        /// <see cref="HeartbeatCategory" />:
-        /// <see cref="HeartbeatCategory.Coding" />(default),
-        /// <see cref="HeartbeatCategory.Building" />,
-        /// <see cref="HeartbeatCategory.Indexing" />,
-        /// <see cref="HeartbeatCategory.Debugging" />,
-        /// <see cref="HeartbeatCategory.RunningTests" />,
-        /// <see cref="HeartbeatCategory.WritingTests" />,
-        /// <see cref="HeartbeatCategory.ManualTesting" />,
-        /// <see cref="HeartbeatCategory.CodeReviewing" />,
-        /// <see cref="HeartbeatCategory.Browsing" />,
-        /// <see cref="HeartbeatCategory.Designing" />
+        /// <param name="category">
+        ///     CLI Arg: [--category] = The category of the file being edited. <br />
+        ///     <see cref="HeartbeatCategory" />:
+        ///     <see cref="HeartbeatCategory.Coding" />(default),
+        ///     <see cref="HeartbeatCategory.Building" />,
+        ///     <see cref="HeartbeatCategory.Indexing" />,
+        ///     <see cref="HeartbeatCategory.Debugging" />,
+        ///     <see cref="HeartbeatCategory.RunningTests" />,
+        ///     <see cref="HeartbeatCategory.WritingTests" />,
+        ///     <see cref="HeartbeatCategory.ManualTesting" />,
+        ///     <see cref="HeartbeatCategory.CodeReviewing" />,
+        ///     <see cref="HeartbeatCategory.Browsing" />,
+        ///     <see cref="HeartbeatCategory.Designing" />
         /// </param>
-        /// <param name="entityType">CLI Arg: [--entity-type] = The type of entity being edited. <br />
-        /// <see cref="EntityType" />:
-        /// <see cref="EntityType.File" />(default),
-        /// <see cref="EntityType.Domain" />,
-        /// <see cref="EntityType.App" />
+        /// <param name="entityType">
+        ///     CLI Arg: [--entity-type] = The type of entity being edited. <br />
+        ///     <see cref="EntityType" />:
+        ///     <see cref="EntityType.File" />(default),
+        ///     <see cref="EntityType.Domain" />,
+        ///     <see cref="EntityType.App" />
         /// </param>
         public void HandleActivity(string currentFile,
                                    bool isWrite,
@@ -227,7 +239,13 @@ namespace WakaTime.Shared.ExtensionUtils
         ///     Sends a heartbeat to the WakaTime API.
         /// </summary>
         /// <param name="heartbeat">The heartbeat to send.</param>
-        public void HandleActivity(FlagHolder heartbeat)
+        /// <param name="throwException">
+        ///     Whether to throw an exception if the heartbeat is not valid. <br />
+        ///     Default is false.  <br />
+        ///     If set to true, and the heartbeat is not valid, an <see cref="AggregateException" /> will be thrown, containing
+        ///     <see cref="MissingFlagException" /> instances for each missing flag.
+        /// </param>
+        public void HandleActivity(FlagHolder heartbeat, bool throwException = false)
         {
             if (heartbeat is null)
             {
@@ -236,7 +254,7 @@ namespace WakaTime.Shared.ExtensionUtils
             }
 
             // validate if it has all required flags set, skip if it doesn't
-            if (!heartbeat.IsValidHeartbeat())
+            if (!heartbeat.IsValidHeartbeat(throwException))
             {
                 Logger.Debug("Skipping heartbeat because it is not valid.");
                 return;
@@ -274,12 +292,11 @@ namespace WakaTime.Shared.ExtensionUtils
 
                 string binary = _dependencies.GetCliLocation();
                 var process = new RunProcess(binary, heartbeat.FlagsToCliArgsArray());
-                
-                var args = heartbeat.FlagsToCliArgsArray();
-                var x = args
-                   .Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
-                   .TrimEnd(' ');
-                
+
+                string[] args = heartbeat.FlagsToCliArgsArray();
+                string x = args.Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
+                               .TrimEnd(' ');
+
                 Logger.Debug($"BINARY: {binary}");
                 Logger.Debug($"FLAGS: {x}");
 

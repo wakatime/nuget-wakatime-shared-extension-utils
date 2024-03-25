@@ -4,8 +4,11 @@ using WakaTime.Shared.ExtensionUtils.Helpers;
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
-    ///     Extension methods for managing [--entity-type] flag.
+    ///     Extension methods for managing [--entity-type] flag. <br /> <br />
+    ///     Add: <see cref="AddFlagEntityType" /> <br />
+    ///     Remove: <see cref="RemoveFlagEntityType" /> <br />
     /// </summary>
+    /// <seealso cref="EntityType"/>
     public static class FlagEntityType
     {
         #region Static Fields and Const
@@ -14,7 +17,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--entity-type</value>
         /// </summary>
-        internal const string CliFlagName = "--entity-type";
+        public const string CliFlagName = "--entity-type";
 
         /// <summary>
         ///     The key name for JSON serialization.

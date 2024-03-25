@@ -45,7 +45,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         private static Func<string, bool, string> CliFormatter => (v, b) =>
         {
             string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName} {formattedValue}";
+            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName}\" \"{formattedValue}";
         };
 
         /// <summary>

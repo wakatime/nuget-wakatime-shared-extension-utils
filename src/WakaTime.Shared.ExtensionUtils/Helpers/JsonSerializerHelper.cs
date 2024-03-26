@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using WakaTime.Shared.ExtensionUtils.Flags;
 
@@ -48,6 +49,8 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
             // ReSharper disable once CognitiveComplexity
             static string ToJson(IEnumerable<FlagHolder> heartbeats, bool isExtraHeartbeat = true, bool obfuscate = false)
         {
+            if(heartbeats == null) return "[]";
+            
             int heartbeatCount = 0;
             var b = new StringBuilder();
             b.Append("[");

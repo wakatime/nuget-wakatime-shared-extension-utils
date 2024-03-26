@@ -17,7 +17,7 @@ namespace WakaTime.Shared.ExtensionUtils.Tests
             var wakaTime = new WakaTime(Globals.Metadata, Globals.LoggerStub);
 
             // Act
-            var keyFlag = wakaTime.CommonFlags.GetFlag(FlagKey.CliFlagName);
+            var keyFlag = wakaTime.CommonFlags.GetFlag(FlagKey.Name.Cli);
 
             // Assert
             Assert.NotNull(keyFlag);
@@ -30,7 +30,7 @@ namespace WakaTime.Shared.ExtensionUtils.Tests
             var wakaTime = new WakaTime(Globals.Metadata, Globals.LoggerStub);
 
             // Act
-            var projectFlag = wakaTime.CommonFlags.GetFlag(FlagPlugin.CliFlagName);
+            var projectFlag = wakaTime.CommonFlags.GetFlag(FlagPlugin.Name.Cli);
 
             // Assert
             Assert.NotNull(projectFlag);
@@ -43,7 +43,7 @@ namespace WakaTime.Shared.ExtensionUtils.Tests
             var wakaTime = new WakaTime(Globals.Metadata, Globals.LoggerStub);
 
             // Act
-            var projectFlag = wakaTime.CommonFlags.GetFlag(FlagProject.CliFlagName);
+            var projectFlag = wakaTime.CommonFlags.GetFlag(FlagProject.Name.Cli);
 
             // Assert
             Assert.Null(projectFlag);

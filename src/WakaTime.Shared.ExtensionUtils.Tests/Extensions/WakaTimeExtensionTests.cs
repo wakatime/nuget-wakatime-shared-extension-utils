@@ -35,11 +35,11 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat();
             
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
         }
 
         [Fact]
@@ -48,13 +48,13 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat(TestFileName);
             
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntity.CliFlagName));
-            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.CliFlagName)
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntity.Name.Cli));
+            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.Name.Cli)
                                               .GetValue());
         }
 
@@ -64,17 +64,17 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat(TestFileName, true);
             
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntity.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagWrite.CliFlagName));
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntity.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagWrite.Name.Cli));
             
-            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.CliFlagName)
+            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.Name.Cli)
                                               .GetValue());
-            Assert.True(result.GetFlag(FlagWrite.CliFlagName).GetValue() == "true");
+            Assert.True(result.GetFlag(FlagWrite.Name.Cli).GetValue() == "true");
         }
 
         [Fact]
@@ -83,18 +83,18 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat(TestFileName, true, AlternateProjectName);
             
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntity.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagWrite.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagProjectAlternate.CliFlagName));
-            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.CliFlagName)
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntity.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagWrite.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagProjectAlternate.Name.Cli));
+            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.Name.Cli)
                                               .GetValue());
-            Assert.True(result.GetFlag(FlagWrite.CliFlagName).GetValue() == "true");
-            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.CliFlagName)
+            Assert.True(result.GetFlag(FlagWrite.Name.Cli).GetValue() == "true");
+            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.Name.Cli)
                                                      .GetValue());
         }
         
@@ -104,20 +104,20 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat(TestFileName, true, AlternateProjectName, _heartbeatCategory, _entityType);
 
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntity.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagWrite.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagProjectAlternate.CliFlagName));
-            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.CliFlagName)
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntity.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagWrite.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagProjectAlternate.Name.Cli));
+            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.Name.Cli)
                                              .GetValue());
-            Assert.True(result.GetFlag(FlagWrite.CliFlagName).GetValue() == "true");
-            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.CliFlagName)
+            Assert.True(result.GetFlag(FlagWrite.Name.Cli).GetValue() == "true");
+            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.Name.Cli)
                                                      .GetValue());
-            Assert.Equal(_heartbeatCategoryText, result.GetFlag(FlagCategory.CliFlagName)
+            Assert.Equal(_heartbeatCategoryText, result.GetFlag(FlagCategory.Name.Cli)
                                                         .GetValue());
         }
 
@@ -127,22 +127,22 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Extensions
             var result = _wakaTimeInstance.CreateHeartbeat(TestFileName, true, AlternateProjectName, _heartbeatCategory, _entityType);
 
             Assert.NotNull(result);
-            Assert.NotNull(result.GetFlag(FlagKey.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagPlugin.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagCategory.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntityType.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagTime.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagEntity.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagWrite.CliFlagName));
-            Assert.NotNull(result.GetFlag(FlagProjectAlternate.CliFlagName));
-            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.CliFlagName)
+            Assert.NotNull(result.GetFlag(FlagKey.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagPlugin.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagCategory.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntityType.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagTime.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagEntity.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagWrite.Name.Cli));
+            Assert.NotNull(result.GetFlag(FlagProjectAlternate.Name.Cli));
+            Assert.Equal(TestFileName, result.GetFlag(FlagEntity.Name.Cli)
                                              .GetValue());
-            Assert.True(result.GetFlag(FlagWrite.CliFlagName).GetValue() == "true");
-            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.CliFlagName)
+            Assert.True(result.GetFlag(FlagWrite.Name.Cli).GetValue() == "true");
+            Assert.Equal(AlternateProjectName, result.GetFlag(FlagProjectAlternate.Name.Cli)
                                                      .GetValue());
-            Assert.Equal(_heartbeatCategoryText, result.GetFlag(FlagCategory.CliFlagName)
+            Assert.Equal(_heartbeatCategoryText, result.GetFlag(FlagCategory.Name.Cli)
                                                        .GetValue());
-            Assert.Equal(_entityTypeText, result.GetFlag(FlagEntityType.CliFlagName)
+            Assert.Equal(_entityTypeText, result.GetFlag(FlagEntityType.Name.Cli)
                                                 .GetValue());
         }
     }

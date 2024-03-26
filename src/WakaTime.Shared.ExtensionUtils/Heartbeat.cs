@@ -68,52 +68,52 @@ namespace WakaTime.Shared.ExtensionUtils
         {
             var exceptions = new List<MissingFlagException>();
 
-            bool hasKey = HasFlag(FlagKey.CliFlagName);
-            bool hasPlugin = HasFlag(FlagPlugin.CliFlagName);
-            bool hasEntity = HasFlag(FlagEntity.CliFlagName);
-            bool hasEntityType = HasFlag(FlagEntityType.CliFlagName);
-            bool hasTime = HasFlag(FlagTime.CliFlagName);
-            bool hasCategory = HasFlag(FlagCategory.CliFlagName);
+            bool hasKey = HasFlag(FlagKey.Name.Cli);
+            bool hasPlugin = HasFlag(FlagPlugin.Name.Cli);
+            bool hasEntity = HasFlag(FlagEntity.Name.Cli);
+            bool hasEntityType = HasFlag(FlagEntityType.Name.Cli);
+            bool hasTime = HasFlag(FlagTime.Name.Cli);
+            bool hasCategory = HasFlag(FlagCategory.Name.Cli);
 
             if (!hasKey)
             {
-                WakaTime.Logger.Error($"{FlagKey.CliFlagName} is required for sending heartbeat.");
-                exceptions.Add(new MissingFlagException(FlagKey.CliFlagName, $"Flag {FlagKey.CliFlagName} is required for sending heartbeat. Use {nameof(FlagKey.AddFlagKey)}."));
+                WakaTime.Logger.Error($"{FlagKey.Name.Cli} is required for sending heartbeat.");
+                exceptions.Add(new MissingFlagException(FlagKey.Name.Cli, $"Flag {FlagKey.Name.Cli} is required for sending heartbeat. Use {nameof(FlagKey.AddFlagKey)}."));
             }
 
             if (!hasPlugin)
             {
-                WakaTime.Logger.Error($"{FlagPlugin.CliFlagName} is required for sending heartbeat.");
-                exceptions.Add(new MissingFlagException(FlagPlugin.CliFlagName,
-                                                        $"Flag {FlagPlugin.CliFlagName} is required for sending heartbeat. Use {nameof(FlagPlugin.AddFlagPlugin)}."));
+                WakaTime.Logger.Error($"{FlagPlugin.Name.Cli} is required for sending heartbeat.");
+                exceptions.Add(new MissingFlagException(FlagPlugin.Name.Cli,
+                                                        $"Flag {FlagPlugin.Name.Cli} is required for sending heartbeat. Use {nameof(FlagPlugin.AddFlagPlugin)}."));
             }
 
             if (!hasEntity)
             {
-                WakaTime.Logger.Error($"{FlagEntity.CliFlagName} is required for sending heartbeat.");
-                exceptions.Add(new MissingFlagException(FlagEntity.CliFlagName,
-                                                        $"Flag {FlagEntity.CliFlagName} is required for sending heartbeat. Use {nameof(FlagEntity.AddFlagEntity)}."));
+                WakaTime.Logger.Error($"{FlagEntity.Name.Cli} is required for sending heartbeat.");
+                exceptions.Add(new MissingFlagException(FlagEntity.Name.Cli,
+                                                        $"Flag {FlagEntity.Name.Cli} is required for sending heartbeat. Use {nameof(FlagEntity.AddFlagEntity)}."));
             }
 
             if (!hasEntityType)
             {
-                WakaTime.Logger.Error($"{FlagEntityType.CliFlagName} is required for sending heartbeat.");
-                exceptions.Add(new MissingFlagException(FlagEntityType.CliFlagName,
-                                                        $"Flag {FlagEntityType.CliFlagName} is required for sending heartbeat. Use {nameof(FlagEntityType.AddFlagEntityType)}."));
+                WakaTime.Logger.Error($"{FlagEntityType.Name.Cli} is required for sending heartbeat.");
+                exceptions.Add(new MissingFlagException(FlagEntityType.Name.Cli,
+                                                        $"Flag {FlagEntityType.Name.Cli} is required for sending heartbeat. Use {nameof(FlagEntityType.AddFlagEntityType)}."));
             }
 
             if (!hasTime)
             {
-                WakaTime.Logger.Error($"{FlagTime.CliFlagName} is required for sending heartbeat.");
+                WakaTime.Logger.Error($"{FlagTime.Name.Cli} is required for sending heartbeat.");
                 exceptions.Add(
-                    new MissingFlagException(FlagTime.CliFlagName, $"Flag {FlagTime.CliFlagName} is required for sending heartbeat. Use {nameof(FlagTime.AddFlagTime)}."));
+                    new MissingFlagException(FlagTime.Name.Cli, $"Flag {FlagTime.Name.Cli} is required for sending heartbeat. Use {nameof(FlagTime.AddFlagTime)}."));
             }
 
             if (!hasCategory)
             {
-                WakaTime.Logger.Error($"{FlagCategory.CliFlagName} is required for sending heartbeat.");
-                exceptions.Add(new MissingFlagException(FlagCategory.CliFlagName,
-                                                        $"Flag {FlagCategory.CliFlagName} is required for sending heartbeat. Use {nameof(FlagCategory.AddFlagCategory)}."));
+                WakaTime.Logger.Error($"{FlagCategory.Name.Cli} is required for sending heartbeat.");
+                exceptions.Add(new MissingFlagException(FlagCategory.Name.Cli,
+                                                        $"Flag {FlagCategory.Name.Cli} is required for sending heartbeat. Use {nameof(FlagCategory.AddFlagCategory)}."));
             }
 
             if (exceptions.Count > 0 && throwException)

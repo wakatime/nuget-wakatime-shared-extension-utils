@@ -17,20 +17,15 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #region Static Fields and Const
 
         /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--time</value>
-        /// </summary>
-        public const string CliFlagName = "--time";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "timestamp";
-
-        /// <summary>
         ///     Unix epoch time.
         /// </summary>
         private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--time</c> <br /> JSON: <c>timestamp</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--time", "timestamp");
 
         #endregion
 
@@ -62,7 +57,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="AddFlagTime(FlagHolder,DateTime,bool)" />
         public static FlagHolder AddFlagTime(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -114,7 +109,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagTime(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

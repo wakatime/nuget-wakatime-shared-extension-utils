@@ -7,13 +7,8 @@
     {
         #region Properties
 
-        /// <summary>
-        ///     Gets the flag name, used internally for flag management.
-        /// </summary>
-        /// <remarks>
-        ///     The name must be unique for each flag type.
-        /// </remarks>
-        string FlagUniqueName { get; }
+        /// <inheritdoc cref="FlagNames" />
+        FlagNames Names { get; }
 
         /// <summary>
         ///     Indicates whether the flag is included in JSON serialization for extra heartbeat.

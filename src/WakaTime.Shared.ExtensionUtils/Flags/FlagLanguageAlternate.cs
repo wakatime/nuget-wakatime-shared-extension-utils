@@ -14,16 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--alternate-language</value>
-        /// </summary>
-        internal const string CliFlagName = "--alternate-language";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "alternate_language";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--alternate-language</c> <br /> JSON: <c>alternate_language</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--alternate-language", "alternate_language");
 
         #endregion
 
@@ -41,7 +36,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #endregion
 
         /// <summary>
-        ///     Adds [--alternate-language] flag to the CLI arguments for all <see cref="Heartbeat"/>s.
+        ///     Adds [--alternate-language] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Optional alternate language name. Auto-detected language takes priority.</param>
@@ -51,13 +46,13 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="FlagLanguage.AddFlagLanguage(FlagHolder,string,bool)" />
         public static FlagHolder AddFlagLanguageAlternate(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Adds [--alternate-language] flag to the CLI arguments for this <see cref="Heartbeat"/> instance.
+        ///     Adds [--alternate-language] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
         /// </summary>
         /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
         /// <param name="value">Optional alternate language name. Auto-detected language takes priority.</param>
@@ -67,18 +62,18 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             AddFlagLanguageAlternate(flagHolder: heartbeat, value, overwrite) as Heartbeat;
 
         /// <summary>
-        ///     Removes the [--alternate-language] flag from the CLI arguments for all <see cref="Heartbeat"/>s.
+        ///     Removes the [--alternate-language] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <seealso cref="FlagLanguage.RemoveFlagLanguage(FlagHolder)" />
         public static FlagHolder RemoveFlagLanguageAlternate(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--alternate-language] flag from the CLI arguments for this <see cref="Heartbeat"/> instance.
+        ///     Removes the [--alternate-language] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
         /// </summary>
         /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
         /// <seealso cref="FlagLanguage.RemoveFlagLanguage(Heartbeat)" />

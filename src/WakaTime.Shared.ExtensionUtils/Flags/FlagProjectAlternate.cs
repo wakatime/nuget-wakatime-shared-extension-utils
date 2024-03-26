@@ -14,16 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--alternate-project</value>
-        /// </summary>
-        public const string CliFlagName = "--alternate-project";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        public const string JsonFlagName = "alternate_project";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--alternate-project</c> <br /> JSON: <c>alternate_project</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--alternate-project", "alternate_project");
 
         #endregion
 
@@ -51,7 +46,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="FlagProject.AddFlagProject(FlagHolder,string,bool)" />
         public static FlagHolder AddFlagProjectAlternate(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -75,7 +70,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="FlagProject.RemoveFlagProject(FlagHolder)" />
         public static FlagHolder RemoveFlagProjectAlternate(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

@@ -15,16 +15,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--category</value>
-        /// </summary>
-        public const string CliFlagName = "--category";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        public const string JsonFlagName = "category";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--category</c> <br /> JSON: <c>category</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--category", "category");
 
         #endregion
 
@@ -42,7 +37,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #endregion
 
         /// <summary>
-        ///     Adds [--category] flag to the CLI arguments for all <see cref="Heartbeat"/>s.
+        ///     Adds [--category] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">
@@ -67,7 +62,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value = HeartbeatCategory.Coding, bool overwrite = true)
         {
             string category = value.GetDescription();
-            var flag = new Flag<string>(category, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(category, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -104,7 +99,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagCategory(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

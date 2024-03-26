@@ -14,16 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--entity</value>
-        /// </summary>
-        public const string CliFlagName = "--entity";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "entity";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--entity</c> <br /> JSON: <c>entity</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--entity", "entity");
 
         #endregion
 
@@ -41,7 +36,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #endregion
 
         /// <summary>
-        ///     Adds [--entity] flag to the CLI arguments for all <see cref="Heartbeat"/>s.
+        ///     Adds [--entity] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">
@@ -53,13 +48,13 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </param>
         public static FlagHolder AddFlagEntity(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Adds [--entity] flag to the CLI arguments for this <see cref="Heartbeat"/> instance.
+        ///     Adds [--entity] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
         /// </summary>
         /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
         /// <param name="value">
@@ -70,17 +65,17 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static Heartbeat AddFlagEntity(this Heartbeat heartbeat, string value, bool overwrite = true) => AddFlagEntity(flagHolder: heartbeat, value, overwrite) as Heartbeat;
 
         /// <summary>
-        ///     Removes the [--entity] flag from the CLI arguments for all <see cref="Heartbeat"/>s.
+        ///     Removes the [--entity] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagEntity(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--entity] flag from the CLI arguments for this <see cref="Heartbeat"/> instance.
+        ///     Removes the [--entity] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
         /// </summary>
         /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
         public static Heartbeat RemoveFlagEntity(this Heartbeat heartbeat) => RemoveFlagEntity(flagHolder: heartbeat) as Heartbeat;

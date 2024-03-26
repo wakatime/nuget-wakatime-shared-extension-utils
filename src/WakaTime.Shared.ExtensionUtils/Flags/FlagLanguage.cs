@@ -14,16 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--language</value>
-        /// </summary>
-        internal const string CliFlagName = "--language";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "language";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--language</c> <br /> JSON: <c>language</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--language", "language");
 
         #endregion
 
@@ -51,7 +46,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="FlagLanguageAlternate.AddFlagLanguageAlternate(FlagHolder,string,bool)" />
         public static FlagHolder AddFlagLanguage(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -73,7 +68,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="FlagLanguageAlternate.RemoveFlagLanguageAlternate(FlagHolder)" />
         public static FlagHolder RemoveFlagLanguage(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

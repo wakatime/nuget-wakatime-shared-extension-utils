@@ -17,16 +17,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments.
-        ///     <value>--extra-heartbeats</value>
-        /// </summary>
-        internal const string CliFlagName = "--extra-heartbeats";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "extra_heartbeats";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--extra-heartbeats</c> <br /> JSON: <c>extra_heartbeats</c>
+        /// </value>
+        internal static FlagNames Name = new FlagNames("--extra-heartbeats", "extra_heartbeats");
 
         #endregion
 
@@ -61,7 +56,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </remarks>
         internal static FlagHolder AddFlagExtraHeartbeats(this FlagHolder flagHolder, bool value = true, bool overwrite = true)
         {
-            var flag = new Flag<bool>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, false, false);
+            var flag = new Flag<bool>(value, ValueFormatter, Name, CliFormatter, JsonFormatter, false, false);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -72,7 +67,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         internal static FlagHolder RemoveFlagExtraHeartbeats(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
     }

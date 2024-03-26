@@ -14,16 +14,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--key</value>
-        /// </summary>
-        public const string CliFlagName = "--key";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "key";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--key</c> <br /> JSON: <c>key</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--key", "key");
 
         #endregion
 
@@ -58,7 +53,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </remarks>
         public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, true, false);
+            var flag = new Flag<string>(value, ValueFormatter, Name, CliFormatter, JsonFormatter, true, false);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -88,7 +83,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagKey(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

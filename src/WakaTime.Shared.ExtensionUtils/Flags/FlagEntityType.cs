@@ -15,16 +15,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     {
         #region Static Fields and Const
 
-        /// <summary>
-        ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
-        ///     <value>--entity-type</value>
-        /// </summary>
-        public const string CliFlagName = "--entity-type";
-
-        /// <summary>
-        ///     The key name for JSON serialization.
-        /// </summary>
-        private const string JsonFlagName = "entity_type";
+        /// <inheritdoc cref="FlagNames" />
+        /// <value>
+        ///     CLI: <c>--entity-type</c> <br /> JSON: <c>entity_type</c>
+        /// </value>
+        public static FlagNames Name = new FlagNames("--entity-type", "entity_type");
 
         #endregion
 
@@ -55,7 +50,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public static FlagHolder AddFlagEntityType(this FlagHolder flagHolder, EntityType value = EntityType.File, bool overwrite = true)
         {
             string entityType = value.GetDescription();
-            var flag = new Flag<string>(entityType, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            var flag = new Flag<string>(entityType, ValueFormatter, Name, CliFormatter, JsonFormatter);
             flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
@@ -80,7 +75,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagEntityType(this FlagHolder flagHolder)
         {
-            flagHolder.RemoveFlag(CliFlagName);
+            flagHolder.RemoveFlag(Name.Cli);
             return flagHolder;
         }
 

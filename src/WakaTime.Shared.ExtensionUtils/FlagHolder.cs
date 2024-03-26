@@ -43,21 +43,21 @@ namespace WakaTime.Shared.ExtensionUtils
         /// <param name="overwrite">Whether to overwrite the flag if it already exists. True by default.</param>
         internal void AddFlag(IFlag flag, bool overwrite = true)
         {
-            if (_flags.ContainsKey(flag.FlagUniqueName))
+            if (_flags.ContainsKey(flag.Names.Cli))
             {
                 if (!overwrite)
                 {
-                    WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} already exists. But the {nameof(overwrite)} flag is set to false. Cannot overwrite.");
+                    WakaTime.Logger.Debug($"Flag {flag.Names.Cli} already exists. But the {nameof(overwrite)} flag is set to false. Cannot overwrite.");
                     return;
                 }
 
-                WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} already exists. Overwriting.");
-                _flags[flag.FlagUniqueName] = flag;
+                WakaTime.Logger.Debug($"Flag {flag.Names.Cli} already exists. Overwriting.");
+                _flags[flag.Names.Cli] = flag;
             }
             else
             {
-                WakaTime.Logger.Debug($"Flag {flag.FlagUniqueName} does not exist. Adding.");
-                _flags.Add(flag.FlagUniqueName, flag);
+                WakaTime.Logger.Debug($"Flag {flag.Names.Cli} does not exist. Adding.");
+                _flags.Add(flag.Names.Cli, flag);
             }
         }
 
@@ -76,7 +76,7 @@ namespace WakaTime.Shared.ExtensionUtils
         ///     If the flag does not exist, it will not throw any exceptions.
         /// </summary>
         /// <param name="flag">The flag to remove.</param>
-        internal void RemoveFlag(IFlag flag) => RemoveFlag(flag.FlagUniqueName);
+        internal void RemoveFlag(IFlag flag) => RemoveFlag(flag.Names.Cli);
 
         /// <summary>
         ///     Removes multiple flags from the collection.

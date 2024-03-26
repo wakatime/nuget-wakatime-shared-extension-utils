@@ -3,7 +3,7 @@ using WakaTime.Shared.ExtensionUtils.Extensions;
 using WakaTime.Shared.ExtensionUtils.Flags;
 using Xunit;
 
-namespace WakaTime.Shared.ExtensionUtils.Tests.Flags
+namespace WakaTime.Shared.ExtensionUtils.Tests.Flags.ByType
 {
     [TestSubject(typeof(Flag<bool>))]
     public class BoolFlagTests

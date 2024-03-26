@@ -1,10 +1,9 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using WakaTime.Shared.ExtensionUtils.Extensions;
 using WakaTime.Shared.ExtensionUtils.Flags;
 using Xunit;
 
-namespace WakaTime.Shared.ExtensionUtils.Tests.Flags
+namespace WakaTime.Shared.ExtensionUtils.Tests.Flags.ByType
 {
     [TestSubject(typeof(Flag<string>))]
     public class StringFlagTests

@@ -17,7 +17,7 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// <returns>
         ///     The <see cref="FlagHolder" /> instance representing the heartbeat. You can continue managing flags with the
         ///     <c>AddFlag*</c> and <c>RemoveFlag*</c> methods.
-        ///     Also, you can use <see cref="FlagHolderExtension.Send" /> method to send the heartbeat to the WakaTime API.
+        ///     Also, you can use <see cref="HeartbeatExtension.Send" /> method to send the heartbeat to the WakaTime API.
         /// </returns>
         /// <example>
         /// <code>
@@ -39,9 +39,9 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// myWakaTime.HandleActivity(heartbeat);
         /// </code>
         /// </example>
-        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime)
+        public static Heartbeat CreateHeartbeat(this WakaTime wakaTime)
         {
-            var beat = new FlagHolder(wakaTime);
+            var beat = new Heartbeat(wakaTime);
             var commonFlags = wakaTime.CommonFlags.Flags;
             beat.AddFlags(commonFlags.Values);
 
@@ -67,12 +67,12 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// <returns>
         ///     The <see cref="FlagHolder" /> instance representing the heartbeat. You can continue managing flags with the
         ///     <c>AddFlag*</c> and <c>RemoveFlag*</c> methods.
-        ///     Also, you can use <see cref="FlagHolderExtension.Send" /> method to send the heartbeat to the WakaTime API.
+        ///     Also, you can use <see cref="HeartbeatExtension.Send" /> method to send the heartbeat to the WakaTime API.
         /// </returns>
         /// <example>
         ///     For example see <see cref="CreateHeartbeat(WakaTime)" />.
         /// </example>
-        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime, string currentFile)
+        public static Heartbeat CreateHeartbeat(this WakaTime wakaTime, string currentFile)
         {
             var beat = CreateHeartbeat(wakaTime);
             beat.AddFlagEntity(currentFile);
@@ -97,12 +97,12 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// <returns>
         ///     The <see cref="FlagHolder" /> instance representing the heartbeat. You can continue managing flags with the
         ///     <c>AddFlag*</c> and <c>RemoveFlag*</c> methods.
-        ///     Also, you can use <see cref="FlagHolderExtension.Send" /> method to send the heartbeat to the WakaTime API.
+        ///     Also, you can use <see cref="HeartbeatExtension.Send" /> method to send the heartbeat to the WakaTime API.
         /// </returns>
         /// <example>
         ///     For example see <see cref="CreateHeartbeat(WakaTime)" />.
         /// </example>
-        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite)
+        public static Heartbeat CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite)
         {
             var beat = CreateHeartbeat(wakaTime, currentFile);
             beat.AddFlagWrite(isWrite);
@@ -131,12 +131,12 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// <returns>
         ///     The <see cref="FlagHolder" /> instance representing the heartbeat. You can continue managing flags with the
         ///     <c>AddFlag*</c> and <c>RemoveFlag*</c> methods.
-        ///     Also, you can use <see cref="FlagHolderExtension.Send" /> method to send the heartbeat to the WakaTime API.
+        ///     Also, you can use <see cref="HeartbeatExtension.Send" /> method to send the heartbeat to the WakaTime API.
         /// </returns>
         /// <example>
         ///     For example see <see cref="CreateHeartbeat(WakaTime)" />.
         /// </example>
-        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite, string alternateProject)
+        public static Heartbeat CreateHeartbeat(this WakaTime wakaTime, string currentFile, bool isWrite, string alternateProject)
         {
             var beat = CreateHeartbeat(wakaTime, currentFile, isWrite);
             beat.AddFlagProjectAlternate(alternateProject);
@@ -167,18 +167,18 @@ namespace WakaTime.Shared.ExtensionUtils.Extensions
         /// <returns>
         ///     The <see cref="FlagHolder" /> instance representing the heartbeat. You can continue managing flags with the
         ///     <c>AddFlag*</c> and <c>RemoveFlag*</c> methods.
-        ///     Also, you can use <see cref="FlagHolderExtension.Send" /> method to send the heartbeat to the WakaTime API.
+        ///     Also, you can use <see cref="HeartbeatExtension.Send" /> method to send the heartbeat to the WakaTime API.
         /// </returns>
         /// <example>
         ///     For example see <see cref="CreateHeartbeat(WakaTime)" />.
         /// </example>
-        public static FlagHolder CreateHeartbeat(this WakaTime wakaTime,
-                                                 string currentFile,
-                                                 bool isWrite,
-                                                 string alternateProject,
-                                                 // ReSharper disable once MethodOverloadWithOptionalParameter
-                                                 HeartbeatCategory? category = null,
-                                                 EntityType? entityType = null)
+        public static Heartbeat CreateHeartbeat(this WakaTime wakaTime,
+                                                string currentFile,
+                                                bool isWrite,
+                                                string alternateProject,
+                                                // ReSharper disable once MethodOverloadWithOptionalParameter
+                                                HeartbeatCategory? category = null,
+                                                EntityType? entityType = null)
         {
             var beat = CreateHeartbeat(wakaTime, currentFile, isWrite, alternateProject);
             if (category.HasValue) beat.AddFlagCategory(category.Value);

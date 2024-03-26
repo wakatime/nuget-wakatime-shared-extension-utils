@@ -6,12 +6,19 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
     ///     Represents a flag for the CLI arguments and JSON serialization.
     /// </summary>
     /// <typeparam name="T">The type of the flag value.</typeparam>
-    internal class Flag<T> : IFlag
+#if DEBUG
+    public
+#else
+    internal
+#endif
+    class Flag<T> : IFlag
     {
         #region Fields
 
-        private readonly Func<T, bool, string> _cliFormatter;
-        private readonly Func<T, bool, string> _jsonFormatter;
+        private readonly Func<string, string, T, string> _cliFormatter;
+        private readonly Func<string, string, T, string> _jsonFormatter;
+        private readonly string _cliFlagName;
+        private readonly string _jsonFlagName;
         private readonly T _value;
         private readonly Func<T, bool, string> _valueFormatter;
 
@@ -20,13 +27,13 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         #region Properties
 
         /// <inheritdoc />
-        public string FlagUniqueName { get; set; }
+        public string FlagUniqueName => _cliFlagName;
 
         /// <inheritdoc />
-        public bool ForExtraHeartbeat { get; set; }
+        public bool ForExtraHeartbeat { get;  }
 
         /// <inheritdoc />
-        public bool CanObfuscate { get; set; }
+        public bool CanObfuscate { get;  }
 
         #endregion
 
@@ -47,19 +54,26 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     Whether the flag is included in JSON serialization for extra heartbeat. Default is
         ///     true.
         /// </param>
-        internal Flag(string flagUniqueName,
-                      T value,
-                      Func<T, bool, string> valueFormatter,
-                      Func<T, bool, string> cliFormatter,
-                      Func<T, bool, string> jsonFormatter,
-                      bool canObfuscate = false,
-                      bool forExtraHeartbeat = true)
+#if DEBUG
+        public
+#else
+        internal
+#endif
+        Flag(T value,
+             Func<T, bool, string> valueFormatter,
+             string cliFlagName,
+             Func<string, string, T, string> cliFormatter,
+             string jsonFlagName,
+             Func<string,string, T, string> jsonFormatter,
+             bool canObfuscate = false,
+             bool forExtraHeartbeat = true)
         {
+            _cliFlagName = cliFlagName;
+            _jsonFlagName = jsonFlagName;
             _value = value;
             _valueFormatter = valueFormatter;
             _cliFormatter = cliFormatter;
             _jsonFormatter = jsonFormatter;
-            FlagUniqueName = flagUniqueName;
             CanObfuscate = canObfuscate;
             ForExtraHeartbeat = forExtraHeartbeat;
         }
@@ -72,10 +86,10 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         public string GetValue(bool obfuscate) => _valueFormatter.Invoke(_value, CanObfuscate && obfuscate);
 
         /// <inheritdoc />
-        public string GetFormattedForCli(bool obfuscate = false) => _cliFormatter.Invoke(_value, CanObfuscate && obfuscate);
+        public string GetFormattedForCli(bool obfuscate = false) => _cliFormatter.Invoke(_cliFlagName, GetValue(obfuscate), _value);
 
         /// <inheritdoc />
-        public string GetFormattedForJson(bool obfuscate = false) => _jsonFormatter.Invoke(_value, CanObfuscate && obfuscate);
+        public string GetFormattedForJson(bool obfuscate = false) => _jsonFormatter.Invoke(_jsonFlagName, GetValue(obfuscate), _value);
 
         #endregion
     }

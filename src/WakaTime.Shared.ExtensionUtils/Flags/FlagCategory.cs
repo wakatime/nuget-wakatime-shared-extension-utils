@@ -5,10 +5,12 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--category] flag. <br /> <br />
-    /// Add: <see cref="AddFlagCategory"/> <br />
-    /// Remove: <see cref="RemoveFlagCategory"/> <br />
+    ///     Add Common Flag:<br /> <see cref="AddFlagCategory(FlagHolder,HeartbeatCategory,bool)" /> <br />
+    ///     Remove Common Flag:<br /> <see cref="RemoveFlagCategory(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag:<br /> <see cref="AddFlagCategory(Heartbeat,HeartbeatCategory,bool)" /> <br />
+    ///     Remove Heartbeat Flag:<br /> <see cref="RemoveFlagCategory(Heartbeat)" /> <br />
     /// </summary>
-    ///  <seealso cref="HeartbeatCategory"/>
+    /// <seealso cref="HeartbeatCategory" />
     public static class FlagCategory
     {
         #region Static Fields and Const
@@ -22,45 +24,34 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <summary>
         ///     The key name for JSON serialization.
         /// </summary>
-        private const string JsonFlagName = "category";
+        public const string JsonFlagName = "category";
 
         #endregion
 
         #region Properties
 
-        /// <summary>
-        ///     Formats the value for JSON serialization.
-        /// </summary>
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
+        /// <inheritdoc cref="Formatters.JsonFormatter{T}" />
+        private static Func<string, string, string, string> JsonFormatter => Formatters.JsonFormatter;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName}\" \"{formattedValue}";
-        };
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, string, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<string, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--category] flag to the CLI arguments.
+        ///     Adds [--category] flag to the CLI arguments for all <see cref="Heartbeat"/>s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">
         ///     <see cref="HeartbeatCategory" /> of this heartbeat activity. <br />
         ///     Can be "coding", "building", "indexing", "debugging", "communicating", "running tests", "writing tests", "manual
         ///     testing", "code reviewing", "browsing", or "designing". Defaults to "coding".
+        /// </param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
         /// </param>
         /// <seealso cref="HeartbeatCategory" />
         /// <seealso cref="HeartbeatCategory.Coding" />
@@ -73,15 +64,42 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <seealso cref="HeartbeatCategory.CodeReviewing" />
         /// <seealso cref="HeartbeatCategory.Browsing" />
         /// <seealso cref="HeartbeatCategory.Designing" />
-        public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value = HeartbeatCategory.Coding)
+        public static FlagHolder AddFlagCategory(this FlagHolder flagHolder, HeartbeatCategory value = HeartbeatCategory.Coding, bool overwrite = true)
         {
             string category = value.GetDescription();
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, category, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<string>(category, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--category] flag from the CLI arguments.
+        ///     Adds [--category] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value">
+        ///     <see cref="HeartbeatCategory" /> of this heartbeat activity. <br />
+        ///     Can be "coding", "building", "indexing", "debugging", "communicating", "running tests", "writing tests", "manual
+        ///     testing", "code reviewing", "browsing", or "designing". Defaults to "coding".
+        /// </param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        /// <seealso cref="HeartbeatCategory" />
+        /// <seealso cref="HeartbeatCategory.Coding" />
+        /// <seealso cref="HeartbeatCategory.Building" />
+        /// <seealso cref="HeartbeatCategory.Indexing" />
+        /// <seealso cref="HeartbeatCategory.Debugging" />
+        /// <seealso cref="HeartbeatCategory.RunningTests" />
+        /// <seealso cref="HeartbeatCategory.WritingTests" />
+        /// <seealso cref="HeartbeatCategory.ManualTesting" />
+        /// <seealso cref="HeartbeatCategory.CodeReviewing" />
+        /// <seealso cref="HeartbeatCategory.Browsing" />
+        /// <seealso cref="HeartbeatCategory.Designing" />
+        public static Heartbeat AddFlagCategory(this Heartbeat heartbeat, HeartbeatCategory value = HeartbeatCategory.Coding, bool overwrite = true) =>
+            AddFlagCategory(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--category] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagCategory(this FlagHolder flagHolder)
@@ -89,5 +107,12 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--category] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        public static Heartbeat RemoveFlagCategory(this Heartbeat heartbeat) =>
+            RemoveFlagCategory(flagHolder: heartbeat) as Heartbeat;
     }
 }

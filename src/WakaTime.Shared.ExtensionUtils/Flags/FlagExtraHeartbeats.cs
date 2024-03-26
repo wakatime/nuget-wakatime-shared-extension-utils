@@ -1,11 +1,12 @@
 ﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--extra-heartbeats] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagExtraHeartbeats" /> <br />
-    ///     Remove: <see cref="RemoveFlagExtraHeartbeats" /> <br />
+    ///     Add:<br /> <see cref="AddFlagExtraHeartbeats" /> <br />
+    ///     Remove:<br /> <see cref="RemoveFlagExtraHeartbeats" /> <br />
     /// </summary>
     /// <remarks>
     ///     The class and methods are intentionally made internal and should not be exposed to the client. <br />
@@ -35,20 +36,15 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     Formats the value for JSON serialization.
         /// </summary>
         /// <remarks>
-        ///     Always returns empty string as the verbose flag should not be serialized to JSON.
+        ///     Always returns empty string as the extra-heartbeats flag should not be serialized to JSON.
         /// </remarks>
-        private static Func<bool, bool, string> JsonFormatter => (v, b) => string.Empty;
+        private static Func<string, string, bool, string> JsonFormatter => (s1, s2, b) => string.Empty;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, bool, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
-                                                                             .ToLower();
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<bool, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
@@ -57,12 +53,16 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">A JSON string array of extra heartbeats to send.</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
         /// <remarks>
         ///     See <see cref="FlagExtraHeartbeats" /> docs for more information.
         /// </remarks>
-        internal static FlagHolder AddFlagExtraHeartbeats(this FlagHolder flagHolder, bool value = true)
+        internal static FlagHolder AddFlagExtraHeartbeats(this FlagHolder flagHolder, bool value = true, bool overwrite = true)
         {
-            flagHolder.AddFlag(new Flag<bool>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<bool>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, false, false);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 

@@ -5,10 +5,12 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--entity-type] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagEntityType" /> <br />
-    ///     Remove: <see cref="RemoveFlagEntityType" /> <br />
+    ///     Add Common Flag:<br /> <see cref="AddFlagEntityType(FlagHolder,EntityType,bool)" /> <br />
+    ///     Remove Common Flag:<br /> <see cref="RemoveFlagEntityType(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag:<br /> <see cref="AddFlagEntityType(Heartbeat,EntityType,bool)" /> <br />
+    ///     Remove Heartbeat Flag:<br /> <see cref="RemoveFlagEntityType(Heartbeat)" /> <br />
     /// </summary>
-    /// <seealso cref="EntityType"/>
+    /// <seealso cref="EntityType" />
     public static class FlagEntityType
     {
         #region Static Fields and Const
@@ -28,48 +30,52 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 
         #region Properties
 
-        /// <summary>
-        ///     Formats the value for JSON serialization.
-        /// </summary>
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
+        /// <inheritdoc cref="Formatters.JsonFormatter{T}" />
+        private static Func<string, string, string, string> JsonFormatter => Formatters.JsonFormatter;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName}\" \"{formattedValue}";
-        };
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, string, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<string, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--entity-type] flag to the CLI arguments.
+        ///     Adds [--entity-type] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value"><see cref="EntityType" /> for this heartbeat. Can be "file", "domain" or "app". Defaults to "file".</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
         /// <seealso cref="EntityType.File" />
         /// <seealso cref="EntityType.Domain" />
         /// <seealso cref="EntityType.App" />
-        public static FlagHolder AddFlagEntityType(this FlagHolder flagHolder, EntityType value = EntityType.File)
+        public static FlagHolder AddFlagEntityType(this FlagHolder flagHolder, EntityType value = EntityType.File, bool overwrite = true)
         {
             string entityType = value.GetDescription();
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, entityType, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<string>(entityType, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--entity-type] flag from the CLI arguments.
+        ///     Adds [--entity-type] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value"><see cref="EntityType" /> for this heartbeat. Can be "file", "domain" or "app". Defaults to "file".</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        /// <seealso cref="EntityType.File" />
+        /// <seealso cref="EntityType.Domain" />
+        /// <seealso cref="EntityType.App" />
+        public static Heartbeat AddFlagEntityType(this Heartbeat heartbeat, EntityType value = EntityType.File, bool overwrite = true) =>
+            AddFlagEntityType(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--entity-type] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagEntityType(this FlagHolder flagHolder)
@@ -77,5 +83,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--entity-type] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        public static Heartbeat RemoveFlagEntityType(this Heartbeat heartbeat) => RemoveFlagEntityType(flagHolder: heartbeat) as Heartbeat;
     }
 }

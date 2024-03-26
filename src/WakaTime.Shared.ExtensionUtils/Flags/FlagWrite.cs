@@ -1,11 +1,14 @@
 ﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--write] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagWrite" /> <br />
-    ///     Remove: <see cref="RemoveFlagWrite" /> <br />
+    ///     Add Common Flag:<br /> <see cref="AddFlagWrite(FlagHolder,bool,bool)" /> <br />
+    ///     Remove Common Flag:<br /> <see cref="RemoveFlagWrite(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag:<br /> <see cref="AddFlagWrite(Heartbeat,bool,bool)" /> <br />
+    ///     Remove Heartbeat Flag:<br /> <see cref="RemoveFlagWrite(Heartbeat)" /> <br />
     /// </summary>
     public static class FlagWrite
     {
@@ -30,37 +33,48 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     Formats the value for the string representation.
         /// </summary>
         /// <remarks>
-        ///     Always returns empty string as the verbose flag should not be serialized to JSON.
+        ///     Always returns empty string as the write flag should not be serialized to JSON.
         /// </remarks>
-        private static Func<bool, bool, string> JsonFormatter => (v, b) => string.Empty;
+        private static Func<string, string, bool, string> JsonFormatter => (s1, s2, b) => string.Empty;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, bool, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
-                                                                             .ToLower();
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<bool, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--write] flag to the CLI arguments.
+        ///     Adds [--write] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <remarks>When set, tells api this heartbeat was triggered from writing to a file.</remarks>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Boolean value to set the flag to. True by default.</param>
-        public static FlagHolder AddFlagWrite(this FlagHolder flagHolder, bool value = true)
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        public static FlagHolder AddFlagWrite(this FlagHolder flagHolder, bool value = true, bool overwrite = true)
         {
-            flagHolder.AddFlag(new Flag<bool>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<bool>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, false, false);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--write] flag from the CLI arguments.
+        ///     Adds [--write] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <remarks>When set, tells api this heartbeat was triggered from writing to a file.</remarks>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value">Boolean value to set the flag to. True by default.</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        public static Heartbeat AddFlagWrite(this Heartbeat heartbeat, bool value = true, bool overwrite = true) =>
+            AddFlagWrite(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--write] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagWrite(this FlagHolder flagHolder)
@@ -68,5 +82,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--write] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        public static Heartbeat RemoveFlagWrite(this Heartbeat heartbeat) => RemoveFlagWrite(flagHolder: heartbeat) as Heartbeat;
     }
 }

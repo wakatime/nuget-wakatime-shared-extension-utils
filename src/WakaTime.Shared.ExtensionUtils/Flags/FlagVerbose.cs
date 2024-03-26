@@ -1,11 +1,14 @@
 ﻿using System;
+using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--verbose] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagVerbose" /> <br />
-    ///     Remove: <see cref="RemoveFlagVerbose" /> <br />
+    ///     Add Common Flag:<br /> <see cref="AddFlagVerbose(FlagHolder,bool,bool)" /> <br />
+    ///     Remove Common Flag:<br /> <see cref="RemoveFlagVerbose(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag:<br /> <see cref="AddFlagVerbose(Heartbeat,bool,bool)" /> <br />
+    ///     Remove Heartbeat Flag:<br /> <see cref="RemoveFlagVerbose(Heartbeat)" /> <br />
     /// </summary>
     public static class FlagVerbose
     {
@@ -15,7 +18,7 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     The flag name for the CLI arguments. Also used for <see cref="IFlag.FlagUniqueName" /> in <see cref="IFlag" />.
         ///     <value>--verbose</value>
         /// </summary>
-        internal const string CliFlagName = "--verbose";
+        public const string CliFlagName = "--verbose";
 
         /// <summary>
         ///     The key name for JSON serialization.
@@ -32,35 +35,46 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         /// <remarks>
         ///     Always returns empty string as the verbose flag should not be serialized to JSON.
         /// </remarks>
-        private static Func<bool, bool, string> JsonFormatter => (v, b) => string.Empty;
+        private static Func<string, string, bool, string> JsonFormatter => (s1, s2, b) => string.Empty;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<bool, bool, string> CliFormatter => (v, b) => !v ? string.Empty : $"{CliFlagName}";
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, bool, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<bool, bool, string> ValueFormatter => (v, b) => v.ToString()
-                                                                             .ToLower();
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<bool, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--verbose] flag to the CLI arguments. <br />
+        ///     Adds [--verbose] flag to the CLI arguments for all <see cref="Heartbeat" />s. <br />
         ///     Turns on debug messages in log file.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Boolean value to set the flag to. True by default.</param>
-        public static FlagHolder AddFlagVerbose(this FlagHolder flagHolder, bool value = true)
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        public static FlagHolder AddFlagVerbose(this FlagHolder flagHolder, bool value = true, bool overwrite = true)
         {
-            flagHolder.AddFlag(new Flag<bool>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<bool>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, false, false);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--verbose] flag from the CLI arguments.
+        ///     Adds [--verbose] flag to the CLI arguments for this <see cref="Heartbeat" /> instance. <br />
+        ///     Turns on debug messages in log file.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value">Boolean value to set the flag to. True by default.</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        public static Heartbeat AddFlagVerbose(this Heartbeat heartbeat, bool value = true, bool overwrite = true) =>
+            AddFlagVerbose(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--verbose] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagVerbose(this FlagHolder flagHolder)
@@ -68,5 +82,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--verbose] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        public static Heartbeat RemoveFlagVerbose(this Heartbeat heartbeat) => RemoveFlagVerbose(flagHolder: heartbeat) as Heartbeat;
     }
 }

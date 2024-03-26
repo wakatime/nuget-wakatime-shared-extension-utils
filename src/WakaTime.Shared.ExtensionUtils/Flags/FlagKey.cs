@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using WakaTime.Shared.ExtensionUtils.Helpers;
 
 namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--key] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagKey" /> <br />
-    ///     Remove: <see cref="RemoveFlagKey" /> <br />
+    ///     Add Common Flag:<br /> <see cref="AddFlagKey(FlagHolder,string,bool)" /> <br />
+    ///     Remove Common Flag:<br /> <see cref="RemoveFlagKey(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag:<br /> <see cref="AddFlagKey(Heartbeat,string,bool)" /> <br />
+    ///     Remove Heartbeat Flag:<br /> <see cref="RemoveFlagKey(Heartbeat)" /> <br />
     /// </summary>
-    [SuppressMessage("ReSharper", "CommentTypo")]
     public static class FlagKey
     {
         #region Static Fields and Const
@@ -29,36 +29,25 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 
         #region Properties
 
-        /// <summary>
-        ///     Formats the value for JSON serialization.
-        /// </summary>
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
+        /// <inheritdoc cref="Formatters.JsonFormatter{T}" />
+        private static Func<string, string, string, string> JsonFormatter => Formatters.JsonFormatter;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName}\" \"{formattedValue}";
-        };
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, string, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<string, bool, string> ValueFormatter => (v, b) => b ? $"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{v.Substring(v.Length - 4)}" : v;
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<string, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--key] flag to the CLI arguments.
+        ///     Adds [--key] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Your wakatime api key; uses api_key from ~/.wakatime.cfg by default.</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
         /// <remarks>
         ///     This flag is added by default to the <see cref="WakaTime.CommonFlags" /> instance on creation and will be
         ///     added to each new <see cref="FlagHolder" />. <br />
@@ -67,15 +56,34 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
         ///     Specifying this flag in <see cref="FlagHolder" /> will override the value from the
         ///     <see cref="WakaTime.CommonFlags" /> only for this Heartbeat.
         /// </remarks>
-        [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value)
+        public static FlagHolder AddFlagKey(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter, true, false));
+            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter, true, false);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--key] flag from the CLI arguments.
+        ///     Adds [--key] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value">Your wakatime api key; uses api_key from ~/.wakatime.cfg by default.</param>
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        /// <remarks>
+        ///     This flag is added by default to the <see cref="WakaTime.CommonFlags" /> instance on creation and will be
+        ///     added to each new <see cref="FlagHolder" />. <br />
+        ///     Specifying this flag in <see cref="WakaTime.CommonFlags" /> will override the value from the configuration
+        ///     file. <br />
+        ///     Specifying this flag in <see cref="FlagHolder" /> will override the value from the
+        ///     <see cref="WakaTime.CommonFlags" /> only for this Heartbeat.
+        /// </remarks>
+        public static Heartbeat AddFlagKey(this Heartbeat heartbeat, string value, bool overwrite = true) =>
+            AddFlagKey(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--key] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         public static FlagHolder RemoveFlagKey(this FlagHolder flagHolder)
@@ -83,5 +91,11 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--key] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        public static Heartbeat RemoveFlagKey(this Heartbeat heartbeat) => RemoveFlagKey(flagHolder: heartbeat) as Heartbeat;
     }
 }

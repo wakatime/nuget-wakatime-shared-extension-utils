@@ -5,8 +5,10 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 {
     /// <summary>
     ///     Extension methods for managing [--language] flag. <br /> <br />
-    ///     Add: <see cref="AddFlagLanguage" /> <br />
-    ///     Remove: <see cref="RemoveFlagLanguage" /> <br />
+    ///     Add Common Flag: <see cref="AddFlagLanguage(FlagHolder,string,bool)" /> <br />
+    ///     Remove Common Flag: <see cref="RemoveFlagLanguage(FlagHolder)" /> <br />
+    ///     Add Heartbeat Flag: <see cref="AddFlagLanguage(Heartbeat,string,bool)" /> <br />
+    ///     Remove Heartbeat Flag: <see cref="RemoveFlagLanguage(Heartbeat)" /> <br />
     /// </summary>
     public static class FlagLanguage
     {
@@ -27,52 +29,59 @@ namespace WakaTime.Shared.ExtensionUtils.Flags
 
         #region Properties
 
-        /// <summary>
-        ///     Formats the value for JSON serialization.
-        /// </summary>
-        private static Func<string, bool, string> JsonFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"\"{JsonFlagName}\": \"{JsonSerializerHelper.JsonEscape(formattedValue)}\"";
-        };
+        /// <inheritdoc cref="Formatters.JsonFormatter{T}" />
+        private static Func<string, string, string, string> JsonFormatter => Formatters.JsonFormatter;
 
-        /// <summary>
-        ///     Formats the value for CLI arguments.
-        /// </summary>
-        private static Func<string, bool, string> CliFormatter => (v, b) =>
-        {
-            string formattedValue = ValueFormatter.Invoke(v, b);
-            return string.IsNullOrEmpty(formattedValue) ? string.Empty : $"{CliFlagName}\" \"{formattedValue}";
-        };
+        /// <inheritdoc cref="Formatters.CliFormatter{T}" />
+        private static Func<string, string, string, string> CliFormatter => Formatters.CliFormatter;
 
-        /// <summary>
-        ///     Formats the value for the string representation.
-        /// </summary>
-        private static Func<string, bool, string> ValueFormatter => (v, b) => v;
+        /// <inheritdoc cref="Formatters.ValueFormatter{T}" />
+        private static Func<string, bool, string> ValueFormatter => Formatters.ValueFormatter;
 
         #endregion
 
         /// <summary>
-        ///     Adds [--language] flag to the CLI arguments.
+        ///     Adds [--language] flag to the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
         /// <param name="value">Optional language name. If valid, takes priority over auto-detected language.</param>
-        /// <seealso cref="FlagLanguageAlternate.AddFlagLanguageAlternate" />
-        public static FlagHolder AddFlagLanguage(this FlagHolder flagHolder, string value)
+        /// <param name="overwrite">
+        ///     Whether to overwrite the existing flag value if it already exists. Defaults to true.
+        /// </param>
+        /// <seealso cref="FlagLanguageAlternate.AddFlagLanguageAlternate(FlagHolder,string,bool)" />
+        public static FlagHolder AddFlagLanguage(this FlagHolder flagHolder, string value, bool overwrite = true)
         {
-            flagHolder.AddFlag(new Flag<string>(CliFlagName, value, ValueFormatter, CliFormatter, JsonFormatter));
+            var flag = new Flag<string>(value, ValueFormatter, CliFlagName, CliFormatter, JsonFlagName, JsonFormatter);
+            flagHolder.AddFlag(flag, overwrite);
             return flagHolder;
         }
 
         /// <summary>
-        ///     Removes the [--language] flag from the CLI arguments.
+        ///     Adds [--language] flag to the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <param name="value">Optional language name. If valid, takes priority over auto-detected language.</param>
+        /// <param name="overwrite"> Whether to overwrite the existing flag value if it already exists. Defaults to true.</param>
+        /// <seealso cref="FlagLanguageAlternate.AddFlagLanguageAlternate(Heartbeat,string,bool)" />
+        public static Heartbeat AddFlagLanguage(this Heartbeat heartbeat, string value, bool overwrite = true) =>
+            AddFlagLanguage(flagHolder: heartbeat, value, overwrite) as Heartbeat;
+
+        /// <summary>
+        ///     Removes the [--language] flag from the CLI arguments for all <see cref="Heartbeat" />s.
         /// </summary>
         /// <param name="flagHolder">The <see cref="FlagHolder" /> instance.</param>
-        /// <seealso cref="FlagLanguageAlternate.RemoveFlagLanguageAlternate" />
+        /// <seealso cref="FlagLanguageAlternate.RemoveFlagLanguageAlternate(FlagHolder)" />
         public static FlagHolder RemoveFlagLanguage(this FlagHolder flagHolder)
         {
             flagHolder.RemoveFlag(CliFlagName);
             return flagHolder;
         }
+
+        /// <summary>
+        ///     Removes the [--language] flag from the CLI arguments for this <see cref="Heartbeat" /> instance.
+        /// </summary>
+        /// <param name="heartbeat">The <see cref="Heartbeat" /> instance.</param>
+        /// <seealso cref="FlagLanguageAlternate.RemoveFlagLanguageAlternate(Heartbeat)" />
+        public static Heartbeat RemoveFlagLanguage(this Heartbeat heartbeat) => RemoveFlagLanguage(flagHolder: heartbeat) as Heartbeat;
     }
 }

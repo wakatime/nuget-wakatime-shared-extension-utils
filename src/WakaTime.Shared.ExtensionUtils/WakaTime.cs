@@ -19,7 +19,7 @@ namespace WakaTime.Shared.ExtensionUtils
         #region Fields
 
         private readonly Dependencies _dependencies;
-        private readonly ConcurrentQueue<FlagHolder> _heartbeatQueue;
+        private readonly ConcurrentQueue<Heartbeat> _heartbeatQueue;
         private readonly Timer _heartbeatsProcessTimer;
         private readonly Metadata _metadata;
         private readonly Timer _totalTimeTodayUpdateTimer;
@@ -36,7 +36,7 @@ namespace WakaTime.Shared.ExtensionUtils
         /// <summary>
         ///     Heartbeats waiting to be sent.
         /// </summary>
-        public IReadOnlyCollection<FlagHolder> HeartbeatQueue => _heartbeatQueue;
+        public IReadOnlyCollection<Heartbeat> HeartbeatQueue => _heartbeatQueue;
 
         /// <summary>
         ///     Flags within this holder will be added to every heartbeat created with
@@ -67,7 +67,7 @@ namespace WakaTime.Shared.ExtensionUtils
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
             Config = new ConfigFile(Dependencies.GetConfigFilePath());
-            _heartbeatQueue = new ConcurrentQueue<FlagHolder>();
+            _heartbeatQueue = new ConcurrentQueue<Heartbeat>();
             CommonFlags = new FlagHolder(this);
 
             _dependencies = new Dependencies(logger, Config);
@@ -245,7 +245,7 @@ namespace WakaTime.Shared.ExtensionUtils
         ///     If set to true, and the heartbeat is not valid, an <see cref="AggregateException" /> will be thrown, containing
         ///     <see cref="MissingFlagException" /> instances for each missing flag.
         /// </param>
-        public void HandleActivity(FlagHolder heartbeat, bool throwException = false)
+        public void HandleActivity(Heartbeat heartbeat, bool throwException = false)
         {
             if (heartbeat is null)
             {
@@ -254,7 +254,7 @@ namespace WakaTime.Shared.ExtensionUtils
             }
 
             // validate if it has all required flags set, skip if it doesn't
-            if (!heartbeat.IsValidHeartbeat(throwException))
+            if (!heartbeat.IsValid(throwException))
             {
                 Logger.Debug("Skipping heartbeat because it is not valid.");
                 return;
@@ -263,7 +263,7 @@ namespace WakaTime.Shared.ExtensionUtils
             AppendHeartbeat(heartbeat);
         }
 
-        private void AppendHeartbeat(FlagHolder heartbeat) => _heartbeatQueue.Enqueue(heartbeat);
+        private void AppendHeartbeat(Heartbeat heartbeat) => _heartbeatQueue.Enqueue(heartbeat);
 
         private bool EnoughTimePassed(DateTime now) => _lastHeartbeat < now.AddMinutes(Constants.HeartbeatFrequency * -1);
 

@@ -291,16 +291,16 @@ namespace WakaTime.Shared.ExtensionUtils
                 }
 
                 string binary = _dependencies.GetCliLocation();
-                var process = new RunProcess(binary, heartbeat.FlagsToCliArgsArray());
+                var process = new RunProcess(binary, heartbeat.ToCliArgsArray());
 
-                string[] args = heartbeat.FlagsToCliArgsArray();
+                string[] args = heartbeat.ToCliArgsArray();
                 string x = args.Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
                                .TrimEnd(' ');
 
                 Logger.Debug($"BINARY: {binary}");
                 Logger.Debug($"FLAGS: {x}");
 
-                Logger.Debug($"[\"{binary}\", \"{string.Join("\", \"", heartbeat.FlagsToCliArgsArray(true))}\"]");
+                Logger.Debug($"[\"{binary}\", \"{string.Join("\", \"", heartbeat.ToCliArgsArray(true))}\"]");
 
                 if (Config.GetSettingAsBoolean("debug"))
                 {

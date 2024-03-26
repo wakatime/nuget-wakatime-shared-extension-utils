@@ -91,6 +91,8 @@ namespace WakaTime.Shared.ExtensionUtils
         ///     Removes a flag from the collection by its unique name.
         /// </summary>
         /// <param name="flagUniqueName">The unique name of the flag to remove.</param>
+        /// <seealso cref="RemoveFlags" />
+        /// <seealso cref="ClearFlags" />
         public void RemoveFlag(string flagUniqueName)
         {
             bool flagExists = _flags.TryGetValue(flagUniqueName, out var existingFlag);
@@ -108,11 +110,19 @@ namespace WakaTime.Shared.ExtensionUtils
         ///     Removes multiple flags from the collection by their unique names.
         /// </summary>
         /// <param name="flagUniqueNames">The unique names of the flags to remove.</param>
-        internal void RemoveFlags(IEnumerable<string> flagUniqueNames)
+        /// <seealso cref="RemoveFlag" />
+        /// <seealso cref="ClearFlags" />
+        public void RemoveFlags(IEnumerable<string> flagUniqueNames)
         {
             foreach (string flagUniqueName in flagUniqueNames) RemoveFlag(flagUniqueName);
         }
 
+        /// <summary>
+        ///     Clears all flags from the collection.
+        /// </summary>
+        /// <seealso cref="RemoveFlag" />
+        /// <seealso cref="RemoveFlags" />
+        public void ClearFlags() => _flags.Clear();
 
         /// <summary>
         ///     Checks if the flag exists in the collection.
@@ -141,19 +151,25 @@ namespace WakaTime.Shared.ExtensionUtils
 #else
         internal
 #endif
-            string[] FlagsToCliArgsArray(bool obfuscate = false)
+            string[] ToCliArgsArray(bool obfuscate = false)
         {
             return Flags.Values.Select(flag => flag.GetFormattedForCli(obfuscate))
                         .Where(cli => !string.IsNullOrWhiteSpace(cli))
                         .ToArray();
         }
 
+        /// <summary>
+        ///     Converts the flags to JSON string.
+        /// </summary>
+        /// <param name="isExtraHeartbeat">Whether to include only flags for extra heartbeats. Default is true.</param>
+        /// <param name="obfuscate">Whether to obfuscate the values. Default is false.</param>
+        /// <returns>JSON string.</returns>
 #if DEBUG
         public
 #else
         internal
 #endif
-            string FlagsToJson(bool isExtraHeartbeat = true, bool obfuscate = false)
+            string ToJson(bool isExtraHeartbeat = true, bool obfuscate = false)
         {
             return JsonSerializerHelper.ToJson(this, isExtraHeartbeat, obfuscate);
         }

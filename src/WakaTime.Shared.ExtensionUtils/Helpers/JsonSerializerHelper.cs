@@ -4,10 +4,34 @@ using WakaTime.Shared.ExtensionUtils.Flags;
 
 namespace WakaTime.Shared.ExtensionUtils.Helpers
 {
-    internal static class JsonSerializerHelper
+#if DEBUG
+    public
+#else
+    internal
+#endif
+        static class JsonSerializerHelper
     {
+        
         /// <summary>
-        ///     Converts the heartbeat flags to JSON.
+        ///     Converts a heartbeat to a JSON string.
+        /// </summary>
+        /// <param name="heartbeat">A heartbeat to serialize.</param>
+        /// <param name="isExtraHeartbeat">Whether to include flags that are not for extra heartbeat.</param>
+        /// <param name="obfuscate"> Whether to obfuscate the values. If set to <c>true</c> only flags that have the <see cref="IFlag.CanObfuscate" /> of the <see cref="IFlag" /> will be obfuscated.</param>
+        /// <returns>JSON string a single heartbeat. <c>{json}</c></returns>
+#if DEBUG
+        public
+#else
+        internal
+#endif
+            static string ToJson(FlagHolder heartbeat, bool isExtraHeartbeat = true, bool obfuscate = false)
+        {
+            string jsonArr = ToJson(new []{heartbeat}, isExtraHeartbeat, obfuscate);
+            return jsonArr.Substring(1, jsonArr.Length - 2);
+        }
+        
+        /// <summary>
+        ///     Converts a list of heartbeats to a JSON string.
         /// </summary>
         /// <param name="heartbeats">The list of heartbeats to serialize.</param>
         /// <param name="isExtraHeartbeat">Whether to include flags that are not for extra heartbeat.</param>
@@ -15,9 +39,14 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
         ///     Whether to obfuscate the values. If set to <c>true</c> only flags that have the
         ///     <see cref="IFlag.CanObfuscate" /> of the <see cref="IFlag" /> will be obfuscated.
         /// </param>
-        /// <returns>JSON string representation of a heartbeat and its flags.</returns>
-        // ReSharper disable once CognitiveComplexity
-        internal static string ToJson(IEnumerable<FlagHolder> heartbeats, bool isExtraHeartbeat = true, bool obfuscate = false)
+        /// <returns>JSON string representing an array of heartbeats. <c>[{json},{json},...]</c> </returns>
+#if DEBUG 
+        public
+#else
+        internal
+#endif
+            // ReSharper disable once CognitiveComplexity
+            static string ToJson(IEnumerable<FlagHolder> heartbeats, bool isExtraHeartbeat = true, bool obfuscate = false)
         {
             int heartbeatCount = 0;
             var b = new StringBuilder();
@@ -58,8 +87,13 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
         /// </summary>
         /// <param name="value">The string to escape.</param>
         /// <returns>Escaped string.</returns>
+#if DEBUG
+        public
+#else
+        internal
+#endif
         // ReSharper disable once CognitiveComplexity
-        internal static string JsonEscape(string value)
+        static string JsonEscape(string value)
         {
             if (value == null) return null;
             var escaped = new StringBuilder();

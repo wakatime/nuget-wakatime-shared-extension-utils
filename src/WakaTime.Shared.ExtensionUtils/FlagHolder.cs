@@ -56,7 +56,7 @@ namespace WakaTime.Shared.ExtensionUtils
             }
             else
             {
-                WakaTime.Logger.Debug($"Flag {flag.Names.Cli} does not exist. Adding.");
+                WakaTime.Logger.Debug($"Flag {flag.Names.Cli} does not exist. Adding {flag.GetValue()}.");
                 _flags.Add(flag.Names.Cli, flag);
             }
         }

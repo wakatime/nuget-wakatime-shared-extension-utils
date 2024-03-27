@@ -259,11 +259,15 @@ namespace WakaTime.Shared.ExtensionUtils
                 Logger.Debug("Skipping heartbeat because it is not valid.");
                 return;
             }
-
+            
             AppendHeartbeat(heartbeat);
         }
 
-        private void AppendHeartbeat(Heartbeat heartbeat) => _heartbeatQueue.Enqueue(heartbeat);
+        private void AppendHeartbeat(Heartbeat heartbeat)
+        {
+            Logger.Debug("Appending heartbeat to queue.");
+            _heartbeatQueue.Enqueue(heartbeat);
+        }
 
         private bool EnoughTimePassed(DateTime now) => _lastHeartbeat < now.AddMinutes(Constants.HeartbeatFrequency * -1);
 
@@ -272,9 +276,17 @@ namespace WakaTime.Shared.ExtensionUtils
         {
             try
             {
+                Logger.Debug("Processing heartbeats...");
+                
                 // get first heartbeat from queue
                 bool gotOne = _heartbeatQueue.TryDequeue(out var heartbeat);
-                if (!gotOne) return;
+                if (!gotOne)
+                {
+                    Logger.Debug("No heartbeats to process.");
+                    return;
+                }
+                
+                Logger.Debug("At least one heartbeat to process.");
 
                 // pop all extra heartbeats from queue
                 var extraHeartbeats = new Collection<FlagHolder>();
@@ -286,8 +298,11 @@ namespace WakaTime.Shared.ExtensionUtils
 
                 if (hasExtraHeartbeats)
                 {
+                    Logger.Debug("Processing extra heartbeats...");
                     heartbeat.AddFlagExtraHeartbeats();
                     extraHeartbeatsString = JsonSerializerHelper.ToJson(extraHeartbeats);
+                    
+                    Logger.Debug($"Extra {extraHeartbeats.Count} heartbeats processed. Serialized to JSON: {extraHeartbeatsString}");
                 }
 
                 string binary = _dependencies.GetCliLocation();
@@ -296,10 +311,7 @@ namespace WakaTime.Shared.ExtensionUtils
                 string[] args = heartbeat.ToCliArgsArray();
                 string x = args.Aggregate(string.Empty, (current, arg) => current + "\"" + arg + "\" ")
                                .TrimEnd(' ');
-
-                Logger.Debug($"BINARY: {binary}");
-                Logger.Debug($"FLAGS: {x}");
-
+                
                 Logger.Debug($"[\"{binary}\", \"{string.Join("\", \"", heartbeat.ToCliArgsArray(true))}\"]");
 
                 if (Config.GetSettingAsBoolean("debug"))
@@ -307,13 +319,14 @@ namespace WakaTime.Shared.ExtensionUtils
                     process.Run(extraHeartbeatsString);
 
                     if (!string.IsNullOrEmpty(process.Output))
-                        Logger.Debug(process.Output);
+                        Logger.Debug($"Process output: {process.Output}");
 
                     if (!string.IsNullOrEmpty(process.Error))
-                        Logger.Debug(process.Error);
+                        Logger.Debug($"Process error: {process.Error}");
                 }
                 else
                 {
+                    Logger.Debug("Running process in background...");
                     process.RunInBackground(extraHeartbeatsString);
                 }
 

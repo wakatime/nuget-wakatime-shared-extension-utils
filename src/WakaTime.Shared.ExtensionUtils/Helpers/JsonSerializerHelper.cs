@@ -65,13 +65,13 @@ namespace WakaTime.Shared.ExtensionUtils.Helpers
                 foreach (var flag in hb.Flags)
                 {
                     // skip flags that are not for extra heartbeat
-                    if (!isExtraHeartbeat && !flag.Value.ForExtraHeartbeat) continue;
+                    if (isExtraHeartbeat && !flag.Value.ForExtraHeartbeat) continue;
 
-                    if (jsonMemberCount > 0) b.Append(",");
                     string flagJsonValue = flag.Value.GetFormattedForJson(obfuscate);
 
                     // skip flags that are empty
                     if (string.IsNullOrEmpty(flagJsonValue)) continue;
+                    if (jsonMemberCount > 0) b.Append(",");
 
                     b.Append(flagJsonValue);
                     jsonMemberCount++;

@@ -103,6 +103,78 @@ namespace WakaTime.Shared.ExtensionUtils.Tests.Helpers
             Assert.Equal("[]", result);
         }
 
+        [Fact]
+        public void ToJson_SingleHeartbeat_SerialisedWithoutFlagsForExtraHeartbeats()
+        {
+            var wakatime = new WakaTime(Globals.Metadata, Globals.LoggerStub);
+            // add all flags to the common flags
+            wakatime.CommonFlags.AddFlagCategory(HeartbeatCategory.WritingTests)
+                    .AddFlagEntity("jsonFlagNamesNotInExtraHeartbeat")
+                    .AddFlagEntityType(EntityType.App)
+                    .AddFlagKey(Apikey)
+                    .AddFlagLanguage(Language)
+                    .AddFlagLanguageAlternate(AlternateLanguage)
+                    .AddFlagPlugin(Plugin)
+                    .AddFlagProject(Project)
+                    .AddFlagProjectAlternate(ProjectAlternate)
+                    .AddFlagTime(DateTime.UtcNow)
+                    .AddFlagVerbose()
+                    .AddFlagWrite();
+            
+            var hb = wakatime.CreateHeartbeat(Entity01);
+            string json = JsonSerializerHelper.ToJson(hb, true);
+            
+            var flagCategory = hb.GetFlag(FlagCategory.Name.Cli);
+            var flagEntity = hb.GetFlag(FlagEntity.Name.Cli);
+            var flagEntityType = hb.GetFlag(FlagEntityType.Name.Cli);
+            var flagKey = hb.GetFlag(FlagKey.Name.Cli);
+            var flagLanguage = hb.GetFlag(FlagLanguage.Name.Cli);
+            var flagLanguageAlternate = hb.GetFlag(FlagLanguageAlternate.Name.Cli);
+            var flagPlugin = hb.GetFlag(FlagPlugin.Name.Cli);
+            var flagProject = hb.GetFlag(FlagProject.Name.Cli);
+            var flagProjectAlternate = hb.GetFlag(FlagProjectAlternate.Name.Cli);
+            var flagTime = hb.GetFlag(FlagTime.Name.Cli);
+            var flagVerbose = hb.GetFlag(FlagVerbose.Name.Cli);
+            var flagWrite = hb.GetFlag(FlagWrite.Name.Cli);
+            
+            Assert.NotNull(hb);
+            Assert.Equal(flagCategory.ForExtraHeartbeat, json.Contains(flagCategory.Names.Json));
+            Assert.Contains(flagCategory.Names.Json, json);
+            
+            Assert.Equal(flagEntity.ForExtraHeartbeat, json.Contains(flagEntity.Names.Json));
+            Assert.Contains(flagEntity.Names.Json, json);
+            
+            Assert.Equal(flagEntityType.ForExtraHeartbeat, json.Contains(flagEntityType.Names.Json));
+            Assert.Contains(flagEntityType.Names.Json, json);
+            
+            Assert.Equal(flagKey.ForExtraHeartbeat, json.Contains(flagKey.Names.Json));
+            Assert.DoesNotContain(flagKey.Names.Json, json);
+            
+            Assert.Equal(flagLanguage.ForExtraHeartbeat, json.Contains(flagLanguage.Names.Json));
+            Assert.Contains(flagLanguage.Names.Json, json);
+            
+            Assert.Equal(flagLanguageAlternate.ForExtraHeartbeat, json.Contains(flagLanguageAlternate.Names.Json));
+            Assert.Contains(flagLanguageAlternate.Names.Json, json);
+            
+            Assert.Equal(flagPlugin.ForExtraHeartbeat, json.Contains(flagPlugin.Names.Json));
+            Assert.DoesNotContain(flagPlugin.Names.Json, json);
+            
+            Assert.Equal(flagProject.ForExtraHeartbeat, json.Contains(flagProject.Names.Json));
+            Assert.Contains(flagProject.Names.Json, json);
+            
+            Assert.Equal(flagProjectAlternate.ForExtraHeartbeat, json.Contains(flagProjectAlternate.Names.Json));
+            Assert.Contains(flagProjectAlternate.Names.Json, json);
+            
+            Assert.Equal(flagTime.ForExtraHeartbeat, json.Contains(flagTime.Names.Json));
+            Assert.Contains(flagTime.Names.Json, json);
+            
+            Assert.Equal(flagVerbose.ForExtraHeartbeat, json.Contains(flagVerbose.Names.Json));
+            Assert.DoesNotContain(flagVerbose.Names.Json, json);
+            
+            Assert.Equal(flagWrite.ForExtraHeartbeat, json.Contains(flagWrite.Names.Json));
+            Assert.DoesNotContain(flagWrite.Names.Json, json);
+        }
+
 
         [Fact]
         public void JsonEscape_WithEmptyString_CorrectlyEscaped()

@@ -17,7 +17,7 @@
         {
             return $"{{\"entity\":\"{Entity.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"," +
                 $"\"timestamp\":{Timestamp}," +
-                $"\"project\":\"{Project.Replace("\"", "\\\"")}\"," +
+                $"\"alternate_project\":\"{Project.Replace("\"", "\\\"")}\"," +
                 $"\"is_write\":{IsWrite.ToString().ToLower()}," +
                 $"\"category\":\"{Category.GetDescription()}\"," +
                 $"\"entity_type\":\"{EntityType.GetDescription()}\"}}";

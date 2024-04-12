@@ -3,6 +3,12 @@ History
 -------
 
 
+4.2.2 (2024-04-12)
+++++++++++++++++++
+
+- Use alternate project for extra heartbeats.
+
+
 4.2.1 (2023-10-26)
 ++++++++++++++++++
 

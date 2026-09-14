@@ -92,7 +92,10 @@ namespace WakaTime.Shared.ExtensionUtils
         }
 
         public void HandleActivity(string currentFile, bool isWrite, string project,
-            HeartbeatCategory? category = null, EntityType? entityType = null)
+            HeartbeatCategory? category = null, EntityType? entityType = null,
+            int? lineNumber = null, int? cursorPosition = null, int? lines = null,
+            string alternateLanguage = null, bool isUnsavedEntity = false,
+            string projectFolder = null)
         {
             if (currentFile == null)
                 return;
@@ -105,11 +108,14 @@ namespace WakaTime.Shared.ExtensionUtils
             _lastFile = currentFile;
             _lastHeartbeat = now;
 
-            AppendHeartbeat(currentFile, isWrite, now, project, category, entityType);
+            AppendHeartbeat(currentFile, isWrite, now, project, category, entityType,
+                lineNumber, cursorPosition, lines, alternateLanguage, isUnsavedEntity, projectFolder);
         }
 
         private void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project,
-            HeartbeatCategory? category, EntityType? entityType)
+            HeartbeatCategory? category, EntityType? entityType,
+            int? lineNumber, int? cursorPosition, int? lines, string alternateLanguage,
+            bool isUnsavedEntity, string projectFolder)
         {
             var h = new Heartbeat
             {
@@ -118,7 +124,13 @@ namespace WakaTime.Shared.ExtensionUtils
                 IsWrite = isWrite,
                 Project = project,
                 Category = category,
-                EntityType = entityType
+                EntityType = entityType,
+                LineNumber = lineNumber,
+                CursorPosition = cursorPosition,
+                Lines = lines,
+                AlternateLanguage = alternateLanguage,
+                IsUnsavedEntity = isUnsavedEntity,
+                ProjectFolder = projectFolder
             };
 
             HeartbeatQueue.Enqueue(h);
@@ -171,6 +183,12 @@ namespace WakaTime.Shared.ExtensionUtils
                 _cliParameters.Project = heartbeat.Project;
                 _cliParameters.Category = heartbeat.Category;
                 _cliParameters.EntityType = heartbeat.EntityType;
+                _cliParameters.LineNumber = heartbeat.LineNumber;
+                _cliParameters.CursorPosition = heartbeat.CursorPosition;
+                _cliParameters.Lines = heartbeat.Lines;
+                _cliParameters.AlternateLanguage = heartbeat.AlternateLanguage;
+                _cliParameters.IsUnsavedEntity = heartbeat.IsUnsavedEntity;
+                _cliParameters.ProjectFolder = heartbeat.ProjectFolder;
                 _cliParameters.HasExtraHeartbeats = hasExtraHeartbeats;
 
                 string extraHeartbeatsString = null;

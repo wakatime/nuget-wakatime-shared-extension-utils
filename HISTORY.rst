@@ -3,6 +3,15 @@ History
 -------
 
 
+4.3.0 (unreleased)
+++++++++++++++++++
+
+- Support lineno, cursorpos, lines-in-file and alternate-language on heartbeats,
+  both as CLI arguments and in extra-heartbeats JSON.
+- Support is-unsaved-entity and project-folder on heartbeats.
+- Escape backslashes in alternate_project when serializing extra heartbeats.
+
+
 4.2.2 (2024-04-12)
 ++++++++++++++++++
 
